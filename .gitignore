@@ -1,0 +1,68 @@
+# =============================================================
+# CODE XERO – AI Content Creator Marketplace
+# .gitignore
+# =============================================================
+
+# --- Node / Frontend ---
+node_modules/
+frontend/node_modules/
+frontend/.env
+frontend/.env.local
+frontend/.env.*.local
+frontend/dist/
+frontend/.vite/
+
+# --- Python / Backend ---
+backend/venv/
+backend/.venv/
+backend/place/
+backend/content/
+backend/creator/
+backend/macall/
+**/venv/
+**/.venv/
+**/Lib/site-packages/
+**/Scripts/
+**/pyvenv.cfg
+backend/__pycache__/
+backend/**/__pycache__/
+**/__pycache__/
+*.py[cod]
+*.pyo
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# --- Database (exclude real production data, keep maccall.db for seeding) ---
+*.sqlite3
+# Keep: backend/maccall.db (seed data only, no real user PII)
+
+# --- Secrets & Credentials ---
+.env
+.env.local
+.env.production
+backend/.env
+*.pem
+*.key
+secrets/
+
+# --- OS & Editor ---
+.DS_Store
+Thumbs.db
+desktop.ini
+.vscode/settings.json
+.idea/
+
+# --- Logs & Build artifacts ---
+*.log
+dist/
+build/
+.cache/
+
+# --- Railway (keep railway.json, ignore local link) ---
+.railway/
+
+# --- Test coverage ---
+htmlcov/
+.coverage
+coverage.xml

@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+
+<html lang="en"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0" name="viewport"/><meta content="web_standard" name="shell-type"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/><link href="https://fonts.googleapis.com" rel="preconnect"/><link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/><link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400..800;1,400..800&amp;family=Plus+Jakarta+Sans:ital,wght@0,300..800;1,300..800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/><style>@layer base{html,body{margin:0;padding:0;}body{overscroll-behavior:none;}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config = { darkMode: "class", theme: { extend: { "colors": { "secondary-fixed-dim": "#eac080", "on-surface-variant": "#494740", "on-error-container": "#93000a", "on-primary": "#ffffff", "on-tertiary-fixed-variant": "#5d4201", "on-surface": "#1b1c18", "error-container": "#ffdad6", "primary-fixed-dim": "#cac6c2", "surface-dim": "#dcdad3", "outline": "#7a776f", "surface": "#fbf9f2", "inverse-on-surface": "#f3f1ea", "inverse-surface": "#30312c", "outline-variant": "#cbc6bd", "surface-container-highest": "#e4e2dc", "surface-container-low": "#f6f4ed", "surface-container": "#f0eee7", "primary-container": "#1c1b19", "inverse-primary": "#cac6c2", "secondary-fixed": "#ffdead", "primary-fixed": "#e6e2de", "surface-bright": "#fbf9f2", "tertiary": "#000000", "surface-tint": "#605e5b", "secondary-container": "#ffd391", "on-background": "#1b1c18", "on-primary-fixed-variant": "#484644", "background": "#fbf9f2", "on-tertiary": "#ffffff", "on-primary-fixed": "#1c1b19", "on-secondary-container": "#795a24", "surface-container-high": "#eae8e1", "on-tertiary-fixed": "#261900", "surface-variant": "#e4e2dc", "on-error": "#ffffff", "tertiary-container": "#261900", "on-primary-container": "#868380", "on-secondary": "#ffffff", "secondary": "#785923", "on-tertiary-container": "#a17f3b", "on-secondary-fixed": "#281900", "error": "#ba1a1a", "surface-container-lowest": "#ffffff", "on-secondary-fixed-variant": "#5e420d", "primary": "#000000", "tertiary-fixed-dim": "#e9c176", "tertiary-fixed": "#ffdea5" }, "borderRadius": { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px" }, "spacing": { "space-sm": "0.75rem", "space-lg": "2rem", "space-md": "1.25rem", "margin-mobile": "1.25rem", "margin": "3rem", "gutter": "1.5rem", "space-xs": "0.375rem", "space-xl": "3.5rem", "gutter-mobile": "1rem" }, "fontFamily": { "body-md": [ "Plus Jakarta Sans" ], "label-sm": [ "Plus Jakarta Sans" ], "body-sm": [ "Plus Jakarta Sans" ], "headline-lg": [ "EB Garamond" ], "label-md": [ "Plus Jakarta Sans" ], "display": [ "EB Garamond" ], "headline-lg-mobile": [ "EB Garamond" ], "label-lg": [ "Plus Jakarta Sans" ], "headline-sm": [ "EB Garamond" ], "body-lg": [ "Plus Jakarta Sans" ], "display-mobile": [ "EB Garamond" ], "headline-md": [ "EB Garamond" ] }, "fontSize": { "body-md": [ "15px", { "lineHeight": "24px", "letterSpacing": "0em", "fontWeight": "400" } ], "label-sm": [ "10px", { "lineHeight": "14px", "letterSpacing": "0.08em", "fontWeight": "600" } ], "body-sm": [ "13px", { "lineHeight": "20px", "letterSpacing": "0.01em", "fontWeight": "400" } ], "headline-lg": [ "40px", { "lineHeight": "48px", "letterSpacing": "-0.015em", "fontWeight": "400" } ], "label-md": [ "12px", { "lineHeight": "16px", "letterSpacing": "0.06em", "fontWeight": "600" } ], "display": [ "56px", { "lineHeight": "64px", "letterSpacing": "-0.02em", "fontWeight": "400" } ], "headline-lg-mobile": [ "28px", { "lineHeight": "36px", "letterSpacing": "-0.01em", "fontWeight": "400" } ], "label-lg": [ "14px", { "lineHeight": "20px", "letterSpacing": "0.04em", "fontWeight": "600" } ], "headline-sm": [ "22px", { "lineHeight": "30px", "letterSpacing": "0em", "fontWeight": "500" } ], "body-lg": [ "18px", { "lineHeight": "28px", "letterSpacing": "-0.005em", "fontWeight": "400" } ], "display-mobile": [ "38px", { "lineHeight": "44px", "letterSpacing": "-0.015em", "fontWeight": "400" } ], "headline-md": [ "28px", { "lineHeight": "36px", "letterSpacing": "-0.01em", "fontWeight": "500" } ] } } } };</script></head><body class="bg-background font-body-md text-body-md text-on-surface antialiased"><header class="fixed top-0 w-full z-50 bg-surface/90 backdrop-blur-md shadow-[0_1px_8px_rgba(0,0,0,0.04)]"><div class="h-20 max-w-7xl mx-auto px-gutter flex items-center justify-between gap-space-md"><div class="flex items-center gap-space-lg"><a class="flex items-center gap-space-xs" data-path="discover" href="#"><img alt="Maccall luxury MC monogram logo with champagne-gold gradient and modern sans wordmark" class="h-8 w-auto object-contain" src="https://lh3.googleusercontent.com/aida/AEtjO1WJX7hESKVA5tVbJQtynmygFiHqkrec04zsg8PxWUnnwI_CUWS3gjmCNh3hoMEkKMq-tJpROC9crcei5tMiqz90tUS9ho2zrmtcAWTXtthqwoUj77cxdNp-yqar3m-25_frRYYXxaCvJPbUzz7xqFBpypB1xTfeAjQyUJt_nvBOyQMt7egJbwDhy0yQLyCgr33qho10NNEmPh4E6yMDMPR2LKAS5cWI-D2vFQ6z2JrM"/><span class="font-headline-sm text-headline-sm tracking-tight text-on-surface ml-1">Maccall</span></a><nav class="hidden lg:flex items-center gap-space-md" data-active-classes="text-on-surface bg-surface-container-high px-space-sm py-1.5 rounded-full"><a class="font-label-lg text-label-lg text-on-surface-variant hover:text-on-surface transition-colors" data-path="discover" href="#">Discover</a><a class="font-label-lg text-label-lg text-on-surface-variant hover:text-on-surface transition-colors" data-path="community" href="#">Community</a><a class="font-label-lg text-label-lg text-on-surface-variant hover:text-on-surface transition-colors" data-path="briefs" href="#">Briefs</a><a class="font-label-lg text-label-lg text-on-surface-variant hover:text-on-surface transition-colors" data-path="workspaces" href="#">Workspaces</a><a aria-current="page" class="font-label-lg transition-colors text-on-surface bg-surface-container-high px-space-sm py-1.5 rounded-full" data-path="leaderboard" href="#">Leaderboard</a></nav></div><div class="flex items-center gap-space-sm"><button aria-label="Search creators and commissions" class="w-9 h-9 rounded-full flex items-center justify-center text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors" type="button"><span class="material-symbols-outlined text-[20px]">search</span></button><button aria-label="Shortlisted folios" class="relative w-9 h-9 rounded-full flex items-center justify-center text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors" type="button"><span class="material-symbols-outlined text-[20px]">bookmark</span><span class="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-secondary"></span></button><button aria-label="Notifications" class="w-9 h-9 rounded-full flex items-center justify-center text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors" type="button"><span class="material-symbols-outlined text-[20px]">notifications</span></button><div class="hidden sm:flex items-center gap-space-sm ml-space-xs"><a class="px-space-md py-2 font-label-lg text-label-lg text-on-surface-variant hover:text-on-surface transition-colors" data-path="sign-in" href="#">Sign in</a><a class="px-space-md py-2 bg-primary text-on-primary font-label-lg text-label-lg rounded-full hover:bg-primary-container hover:text-on-surface transition-all" data-path="get-started" href="#">Get started</a></div><div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center ml-1"><span class="material-symbols-outlined text-on-primary text-[18px]">person</span></div></div></div></header><main class="w-full pt-20 bg-background"><div class="flex flex-col w-full">
+<!-- Subtle Architectural Atmospheric Tinting -->
+<div class="relative w-full overflow-hidden">
+<div class="absolute -top-32 left-1/4 w-[600px] h-[360px] bg-secondary-container/20 rounded-full blur-3xl pointer-events-none -z-10"></div>
+<div class="absolute top-96 right-10 w-[420px] h-[420px] bg-secondary-fixed/30 rounded-full blur-3xl pointer-events-none -z-10"></div>
+<div class="max-w-7xl mx-auto px-gutter py-space-lg lg:py-space-xl">
+<!-- Section Header with Editorial Cadence -->
+<header class="flex flex-col md:flex-row md:items-end justify-between gap-space-lg pb-space-lg">
+<div class="max-w-2xl space-y-space-xs">
+<div class="flex items-center gap-2">
+<span class="inline-flex items-center justify-center w-2 h-2 rounded-full bg-secondary"></span>
+<span class="font-label-sm text-label-sm uppercase tracking-widest text-secondary font-semibold">Q2 Curatorial Consensus • Verified Index</span>
+</div>
+<h1 class="font-headline-lg text-headline-lg text-on-surface tracking-tight">
+            Director Leaderboard &amp; Industry Rankings
+          </h1>
+<p class="font-body-lg text-body-lg text-on-surface-variant leading-relaxed">
+            The most trusted, prolific, and commercially vetted AI creators ranked by verified deliverability, algorithmic precision, and institutional repute.
+          </p>
+</div>
+<!-- Metric Highlights Box -->
+<div class="flex items-center gap-space-lg p-space-md bg-surface-container rounded-lg shadow-sm">
+<div class="flex flex-col">
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">Median SLA</span>
+<span class="font-headline-sm text-headline-sm text-on-surface font-normal">99.1%</span>
+</div>
+<div class="w-[1px] h-8 bg-outline-variant"></div>
+<div class="flex flex-col">
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">Total Briefs</span>
+<span class="font-headline-sm text-headline-sm text-on-surface font-normal">1,482</span>
+</div>
+<div class="w-[1px] h-8 bg-outline-variant"></div>
+<div class="flex flex-col">
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">Escrow Integrity</span>
+<span class="font-headline-sm text-headline-sm text-secondary font-normal">100%</span>
+</div>
+</div>
+</header>
+<!-- Category Filter Pills -->
+<nav aria-label="Category Filters" class="flex flex-wrap items-center gap-2 py-space-sm mb-space-lg">
+<button class="px-space-md py-1.5 rounded-full bg-primary text-on-primary font-label-md text-label-md shadow-sm transition-transform active:scale-95" type="button">
+          All Specialties
+        </button>
+<button class="px-space-md py-1.5 rounded-full bg-surface-container hover:bg-surface-container-high text-on-surface-variant hover:text-on-surface font-label-md text-label-md transition-colors" type="button">
+          Commercial Video
+        </button>
+<button class="px-space-md py-1.5 rounded-full bg-surface-container hover:bg-surface-container-high text-on-surface-variant hover:text-on-surface font-label-md text-label-md transition-colors" type="button">
+          Haute Couture
+        </button>
+<button class="px-space-md py-1.5 rounded-full bg-surface-container hover:bg-surface-container-high text-on-surface-variant hover:text-on-surface font-label-md text-label-md transition-colors" type="button">
+          3D Motion
+        </button>
+<button class="px-space-md py-1.5 rounded-full bg-surface-container hover:bg-surface-container-high text-on-surface-variant hover:text-on-surface font-label-md text-label-md transition-colors" type="button">
+          Sonic Engineering
+        </button>
+<button class="px-space-md py-1.5 rounded-full bg-surface-container hover:bg-surface-container-high text-on-surface-variant hover:text-on-surface font-label-md text-label-md transition-colors" type="button">
+          Brand Campaigns
+        </button>
+</nav>
+<!-- Top Spotlight Cards (Top 3 Tier) Asymmetric Editorial Grid -->
+<section aria-label="Top 3 Directors" class="grid grid-cols-1 lg:grid-cols-12 gap-gutter mb-space-xl items-stretch">
+<!-- RANK 1: Aarav Studio (Dominant Hero Card - Col Span 6) -->
+<article class="lg:col-span-6 bg-surface-container-low rounded-xl overflow-hidden shadow-md flex flex-col justify-between group transition-all duration-300 hover:shadow-xl">
+<div class="relative h-80 sm:h-96 w-full overflow-hidden bg-surface-container">
+<img class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" data-alt="Editorial photograph of an avant-garde runway featuring a sleek hypercar with warm gold luminescent striping beside models in structured metallic couture garments against architectural concrete brutalist pillars at twilight, hyper-realistic slow luxury editorial tone" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBiQzRFm8D5TKOpEJDUKbBecWaa0FzX6xwbPowjPCet5Jrw11L0__tTfE1hxwvVCA6IxXx6xY3nz9-25KGrJeV-sUS5EudigjDIYTQACJvbb6DT5UFu1ZGUodV52uprma6W3j_yPFpQ0seaTG0o-pyR10mjHIS8-ErO7x9NWWA0WpWgFn6Ze6oAVSI57kwIz15IS5tiigm2djrdcpD29cN_Sf55ymodGtamgcNX3F4"/>
+<div class="absolute inset-0 bg-gradient-to-t from-primary/80 via-primary/30 to-transparent"></div>
+<!-- Laurels & Rank Badge -->
+<div class="absolute top-4 left-4 flex items-center gap-2">
+<span class="inline-flex items-center gap-1 px-3 py-1 bg-surface/95 backdrop-blur-md rounded-full shadow-sm text-secondary font-label-sm text-label-sm uppercase tracking-wider">
+<span class="material-symbols-outlined text-[16px] text-secondary">workspace_premium</span>
+                Rank 01 • Gold Laurels
+              </span>
+<span class="px-3 py-1 bg-secondary text-on-secondary rounded-full font-label-sm text-label-sm uppercase tracking-wider font-bold shadow-sm">
+                Director of the Month
+              </span>
+</div>
+<div class="absolute bottom-4 left-4 right-4 text-on-primary">
+<span class="font-label-sm text-label-sm uppercase tracking-widest text-secondary-container opacity-90">Cinematic Automotive • Narrative Video</span>
+<h2 class="font-headline-md text-headline-md font-normal leading-tight text-on-primary">Aarav Studio</h2>
+</div>
+</div>
+<div class="p-space-lg flex flex-col justify-between flex-grow gap-space-md bg-surface-container-low">
+<div class="grid grid-cols-3 gap-2 py-space-xs">
+<div class="p-3 bg-surface-container rounded-lg">
+<span class="font-label-sm text-label-sm text-on-surface-variant block uppercase">SLA Index</span>
+<span class="font-headline-sm text-headline-sm text-on-surface">99.4%</span>
+</div>
+<div class="p-3 bg-surface-container rounded-lg">
+<span class="font-label-sm text-label-sm text-on-surface-variant block uppercase">Commissions</span>
+<span class="font-headline-sm text-headline-sm text-on-surface">48</span>
+</div>
+<div class="p-3 bg-surface-container rounded-lg">
+<span class="font-label-sm text-label-sm text-on-surface-variant block uppercase">On-Time</span>
+<span class="font-headline-sm text-headline-sm text-secondary">100%</span>
+</div>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant">
+              Premier practitioner of algorithmic automotive trajectories and cinematic physics. Verified primary engine pipeline: Runway Gen-3 Alpha, Sora Enterprise, custom Latent LoRA pipelines.
+            </p>
+<div class="flex items-center justify-between pt-space-xs gap-space-sm">
+<a class="inline-flex items-center gap-1.5 px- space-md py-2 text-on-surface hover:text-secondary font-label-lg text-label-lg transition-colors" href="#">
+<span>Examine Folio</span>
+<span class="material-symbols-outlined text-[16px]">arrow_outward</span>
+</a>
+<button class="px-space-md py-2.5 rounded-full bg-primary text-on-primary font-label-lg text-label-lg hover:bg-primary-container hover:text-on-surface transition-all shadow-sm" type="button">
+                Invite to Brief
+              </button>
+</div>
+</div>
+</article>
+<!-- RANK 2 & 3: Meera Visuals & Kabir Motion (Col Span 6 Stacked/Split) -->
+<div class="lg:col-span-6 flex flex-col justify-between gap-gutter">
+<!-- RANK 2: Meera Visuals -->
+<article class="bg-surface-container-low rounded-xl overflow-hidden shadow-md flex flex-col sm:flex-row group transition-all duration-300 hover:shadow-xl flex-1">
+<div class="relative sm:w-2/5 h-64 sm:h-auto overflow-hidden bg-surface-container">
+<img class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" data-alt="Editorial portrait of high fashion muse wearing an ethereal lavender and champagne pleated organza sculptural gown illuminated from within, high contrast dark studio backdrop, soft cinematic rim light, refined haute couture magazine layout" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCtUdRPI1pTXrN9G44oEJdX51HVIPWkQ8GDMlqrD3PzIqzgLvWO43XFa0lYKWSGVCxEQz0C6wVNkLpEbgmuSldzlZn8sVuxtUYTVW0PCecgk-EoQQgdP3DgUOnCWphvMDP1NvBkgN4DgqMd4RUErch2ckdSU8_twbu2Cvvz8g9nD8wA3imbQKQjsK1Vqy8ktWcb1Z74w8agja90LzH9XBj6aqQHk8L62BvVsOwxaTc"/>
+<div class="absolute inset-0 bg-gradient-to-t from-primary/60 via-transparent to-transparent sm:hidden"></div>
+<div class="absolute top-3 left-3 flex items-center">
+<span class="inline-flex items-center gap-1 px-2.5 py-1 bg-surface/95 backdrop-blur-md rounded-full shadow-sm text-on-surface-variant font-label-sm text-label-sm uppercase tracking-wider">
+<span class="material-symbols-outlined text-[15px] text-outline">military_tech</span>
+                  Rank 02 • Silver
+                </span>
+</div>
+</div>
+<div class="sm:w-3/5 p-space-md sm:p-space-lg flex flex-col justify-between gap-space-sm">
+<div>
+<span class="font-label-sm text-label-sm uppercase tracking-widest text-secondary">Generative Haute Couture</span>
+<h3 class="font-headline-sm text-headline-sm text-on-surface mt-1">Meera Visuals</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-2 line-clamp-2">
+                  Specializing in photorealistic tactile fabrics, digital silks, and algorithmic garment physics for luxury European maisons.
+                </p>
+</div>
+<div class="flex items-center gap-space-md py-1 text-on-surface">
+<div>
+<span class="font-label-sm text-label-sm text-on-surface-variant block">SLA</span>
+<span class="font-label-lg text-label-lg font-bold">98.9%</span>
+</div>
+<div class="w-[1px] h-6 bg-outline-variant"></div>
+<div>
+<span class="font-label-sm text-label-sm text-on-surface-variant block">Projects</span>
+<span class="font-label-lg text-label-lg font-bold">62 Briefs</span>
+</div>
+<div class="w-[1px] h-6 bg-outline-variant"></div>
+<div>
+<span class="font-label-sm text-label-sm text-on-surface-variant block">Rating</span>
+<span class="font-label-lg text-label-lg font-bold">4.97 ★</span>
+</div>
+</div>
+<div class="flex items-center justify-between pt-1">
+<a class="font-label-md text-label-md text-on-surface hover:text-secondary transition-colors underline underline-offset-4 decoration-outline-variant" href="#">Profile</a>
+<button class="px-space-md py-1.5 rounded-full bg-surface-container-highest hover:bg-primary hover:text-on-primary text-on-surface font-label-md text-label-md transition-colors" type="button">
+                  Invite
+                </button>
+</div>
+</div>
+</article>
+<!-- RANK 3: Kabir Motion -->
+<article class="bg-surface-container-low rounded-xl overflow-hidden shadow-md flex flex-col sm:flex-row group transition-all duration-300 hover:shadow-xl flex-1">
+<div class="relative sm:w-2/5 h-64 sm:h-auto overflow-hidden bg-surface-container">
+<img class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" data-alt="Monolithic 3D surreal sculpture composed of chrome, titanium filaments, and warm brass organic liquid droplets floating weightlessly in an echoing gallery space, dark slate grey architecture, museum lighting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDGc--1zG9vIZH-pXXUmVlsIfCeaAQlKPC6QKLjdDgjZOAmuvSZacYriu6FdfaoYdyhG0-0B-Gak25_E1GVdfj0HNbV2NS0_lP4fYnk30l4aN_i54kZiG9hWexX_lxbnHb7m38OFrIJtBYM18aH-1zrfWVyc0qdlgTA9nngihUHwK4ns9g0VfI_k0x5uFWEXTZi8T6zvIJOBd_DNyXOOtxG2uxQNwPOSmBclKvPIKA"/>
+<div class="absolute inset-0 bg-gradient-to-t from-primary/60 via-transparent to-transparent sm:hidden"></div>
+<div class="absolute top-3 left-3 flex items-center">
+<span class="inline-flex items-center gap-1 px-2.5 py-1 bg-surface/95 backdrop-blur-md rounded-full shadow-sm text-on-surface-variant font-label-sm text-label-sm uppercase tracking-wider">
+<span class="material-symbols-outlined text-[15px] text-secondary">award_star</span>
+                  Rank 03 • Bronze
+                </span>
+</div>
+</div>
+<div class="sm:w-3/5 p-space-md sm:p-space-lg flex flex-col justify-between gap-space-sm">
+<div>
+<span class="font-label-sm text-label-sm uppercase tracking-widest text-secondary">Surreal 3D &amp; Biomechanics</span>
+<h3 class="font-headline-sm text-headline-sm text-on-surface mt-1">Kabir Motion</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-2 line-clamp-2">
+                  Unreal Engine 5 and procedural generative synthesis for monumental experiential brand installations and spatial audio visualizers.
+                </p>
+</div>
+<div class="flex items-center gap-space-md py-1 text-on-surface">
+<div>
+<span class="font-label-sm text-label-sm text-on-surface-variant block">SLA</span>
+<span class="font-label-lg text-label-lg font-bold">98.2%</span>
+</div>
+<div class="w-[1px] h-6 bg-outline-variant"></div>
+<div>
+<span class="font-label-sm text-label-sm text-on-surface-variant block">Projects</span>
+<span class="font-label-lg text-label-lg font-bold">34 Briefs</span>
+</div>
+<div class="w-[1px] h-6 bg-outline-variant"></div>
+<div>
+<span class="font-label-sm text-label-sm text-on-surface-variant block">Rating</span>
+<span class="font-label-lg text-label-lg font-bold">4.95 ★</span>
+</div>
+</div>
+<div class="flex items-center justify-between pt-1">
+<a class="font-label-md text-label-md text-on-surface hover:text-secondary transition-colors underline underline-offset-4 decoration-outline-variant" href="#">Profile</a>
+<button class="px-space-md py-1.5 rounded-full bg-surface-container-highest hover:bg-primary hover:text-on-primary text-on-surface font-label-md text-label-md transition-colors" type="button">
+                  Invite
+                </button>
+</div>
+</div>
+</article>
+</div>
+</section>
+<!-- Detailed Ranked Directory Section -->
+<section aria-labelledby="directory-heading" class="flex flex-col gap-space-md">
+<div class="flex flex-col sm:flex-row sm:items-end justify-between gap-space-sm pb-space-xs">
+<div>
+<h2 class="font-headline-md text-headline-md text-on-surface" id="directory-heading">
+              Verified Master Registry
+            </h2>
+<p class="font-body-sm text-body-sm text-on-surface-variant">
+              Complete index tracking strict provenance guarantees, delivery milestones, and verified multi-engine workflows.
+            </p>
+</div>
+<div class="flex items-center gap-2">
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">Sort:</span>
+<span class="font-label-md text-label-md text-on-surface font-semibold bg-surface-container px-3 py-1.5 rounded-full">Deliverability &amp; SLA ↓</span>
+</div>
+</div>
+<!-- Editorial Clean Table Container (No Harsh Grid Borders) -->
+<div class="w-full bg-surface-container-lowest rounded-xl shadow-sm overflow-x-auto">
+<table class="w-full text-left border-collapse min-w-[860px]">
+<thead>
+<tr class="bg-surface-container-low text-on-surface-variant">
+<th class="py-space-md px-space-md font-label-sm text-label-sm uppercase tracking-wider w-16 text-center" scope="col">Rank</th>
+<th class="py-space-md px-space-md font-label-sm text-label-sm uppercase tracking-wider" scope="col">Creator &amp; Studio</th>
+<th class="py-space-md px-space-md font-label-sm text-label-sm uppercase tracking-wider" scope="col">Specialization</th>
+<th class="py-space-md px-space-md font-label-sm text-label-sm uppercase tracking-wider" scope="col">Primary Pipelines</th>
+<th class="py-space-md px-space-md font-label-sm text-label-sm uppercase tracking-wider text-center" scope="col">Briefs</th>
+<th class="py-space-md px-space-md font-label-sm text-label-sm uppercase tracking-wider text-center" scope="col">Rating</th>
+<th class="py-space-md px-space-md font-label-sm text-label-sm uppercase tracking-wider text-center" scope="col">Verified SLA</th>
+<th class="py-space-md px-space-md font-label-sm text-label-sm uppercase tracking-wider text-right pr-6" scope="col">Direct Actions</th>
+</tr>
+</thead>
+<tbody class="divide-y-0">
+<!-- ROW 1: Aarav Studio -->
+<tr class="hover:bg-surface-container-low/60 transition-colors group">
+<td class="py-space-md px-space-md text-center">
+<span class="inline-flex items-center justify-center w-7 h-7 rounded-full bg-secondary text-on-secondary font-label-md text-label-md font-semibold">
+                    1
+                  </span>
+</td>
+<td class="py-space-md px-space-md">
+<div class="flex items-center gap-space-sm">
+<div class="w-10 h-10 rounded-full bg-surface-container flex items-center justify-center font-headline-sm text-headline-sm text-secondary">
+                      A
+                    </div>
+<div>
+<span class="font-label-lg text-label-lg font-bold text-on-surface block group-hover:text-secondary transition-colors">Aarav Studio</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">London • Member since 2024</span>
+</div>
+</div>
+</td>
+<td class="py-space-md px-space-md">
+<span class="px-2.5 py-1 bg-surface-container rounded-md font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wide">
+                    Automotive / Video
+                  </span>
+</td>
+<td class="py-space-md px-space-md">
+<div class="flex items-center gap-1.5 flex-wrap">
+<span class="font-label-sm text-label-sm px-2 py-0.5 bg-surface-container rounded text-on-surface">Runway Gen-3</span>
+<span class="font-label-sm text-label-sm px-2 py-0.5 bg-surface-container rounded text-on-surface">Sora API</span>
+</div>
+</td>
+<td class="py-space-md px-space-md text-center font-label-lg text-label-lg text-on-surface">
+                  48
+                </td>
+<td class="py-space-md px-space-md text-center">
+<div class="inline-flex items-center gap-1 font-label-md text-label-md text-on-surface">
+<span class="text-secondary font-bold">4.98</span>
+<span class="material-symbols-outlined text-[14px] text-secondary">star</span>
+</div>
+</td>
+<td class="py-space-md px-space-md text-center">
+<span class="inline-block px-2.5 py-1 rounded-full bg-surface-container-high text-secondary font-label-sm text-label-sm font-bold">
+                    100% On-Time
+                  </span>
+</td>
+<td class="py-space-md px-space-md text-right pr-6">
+<div class="inline-flex items-center gap-2">
+<a class="px-3 py-1.5 rounded-full hover:bg-surface-container text-on-surface font-label-md text-label-md transition-colors" href="#">Profile</a>
+<button class="px-3.5 py-1.5 rounded-full bg-primary text-on-primary font-label-md text-label-md hover:bg-primary-container hover:text-on-surface transition-all" type="button">Invite</button>
+</div>
+</td>
+</tr>
+<!-- ROW 2: Meera Visuals -->
+<tr class="hover:bg-surface-container-low/60 transition-colors group bg-surface-container-lowest">
+<td class="py-space-md px-space-md text-center">
+<span class="inline-flex items-center justify-center w-7 h-7 rounded-full bg-surface-container-highest text-on-surface font-label-md text-label-md font-semibold">
+                    2
+                  </span>
+</td>
+<td class="py-space-md px-space-md">
+<div class="flex items-center gap-space-sm">
+<div class="w-10 h-10 rounded-full bg-surface-container flex items-center justify-center font-headline-sm text-headline-sm text-secondary">
+                      M
+                    </div>
+<div>
+<span class="font-label-lg text-label-lg font-bold text-on-surface block group-hover:text-secondary transition-colors">Meera Visuals</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Paris • Atelier Resident</span>
+</div>
+</div>
+</td>
+<td class="py-space-md px-space-md">
+<span class="px-2.5 py-1 bg-surface-container rounded-md font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wide">
+                    Haute Couture
+                  </span>
+</td>
+<td class="py-space-md px-space-md">
+<div class="flex items-center gap-1.5 flex-wrap">
+<span class="font-label-sm text-label-sm px-2 py-0.5 bg-surface-container rounded text-on-surface">Midjourney v6</span>
+<span class="font-label-sm text-label-sm px-2 py-0.5 bg-surface-container rounded text-on-surface">SDXL LoRA</span>
+</div>
+</td>
+<td class="py-space-md px-space-md text-center font-label-lg text-label-lg text-on-surface">
+                  62
+                </td>
+<td class="py-space-md px-space-md text-center">
+<div class="inline-flex items-center gap-1 font-label-md text-label-md text-on-surface">
+<span class="text-secondary font-bold">4.97</span>
+<span class="material-symbols-outlined text-[14px] text-secondary">star</span>
+</div>
+</td>
+<td class="py-space-md px-space-md text-center">
+<span class="inline-block px-2.5 py-1 rounded-full bg-surface-container-high text-on-surface font-label-sm text-label-sm font-semibold">
+                    98% On-Time
+                  </span>
+</td>
+<td class="py-space-md px-space-md text-right pr-6">
+<div class="inline-flex items-center gap-2">
+<a class="px-3 py-1.5 rounded-full hover:bg-surface-container text-on-surface font-label-md text-label-md transition-colors" href="#">Profile</a>
+<button class="px-3.5 py-1.5 rounded-full bg-primary text-on-primary font-label-md text-label-md hover:bg-primary-container hover:text-on-surface transition-all" type="button">Invite</button>
+</div>
+</td>
+</tr>
+<!-- ROW 3: Kabir Motion -->
+<tr class="hover:bg-surface-container-low/60 transition-colors group">
+<td class="py-space-md px-space-md text-center">
+<span class="inline-flex items-center justify-center w-7 h-7 rounded-full bg-surface-container-high text-on-surface font-label-md text-label-md font-semibold">
+                    3
+                  </span>
+</td>
+<td class="py-space-md px-space-md">
+<div class="flex items-center gap-space-sm">
+<div class="w-10 h-10 rounded-full bg-surface-container flex items-center justify-center font-headline-sm text-headline-sm text-secondary">
+                      K
+                    </div>
+<div>
+<span class="font-label-lg text-label-lg font-bold text-on-surface block group-hover:text-secondary transition-colors">Kabir Motion</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Berlin • Studio Lab</span>
+</div>
+</div>
+</td>
+<td class="py-space-md px-space-md">
+<span class="px-2.5 py-1 bg-surface-container rounded-md font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wide">
+                    Surreal 3D Motion
+                  </span>
+</td>
+<td class="py-space-md px-space-md">
+<div class="flex items-center gap-1.5 flex-wrap">
+<span class="font-label-sm text-label-sm px-2 py-0.5 bg-surface-container rounded text-on-surface">Blender Cycles</span>
+<span class="font-label-sm text-label-sm px-2 py-0.5 bg-surface-container rounded text-on-surface">Runway</span>
+</div>
+</td>
+<td class="py-space-md px-space-md text-center font-label-lg text-label-lg text-on-surface">
+                  34
+                </td>
+<td class="py-space-md px-space-md text-center">
+<div class="inline-flex items-center gap-1 font-label-md text-label-md text-on-surface">
+<span class="text-secondary font-bold">4.95</span>
+<span class="material-symbols-outlined text-[14px] text-secondary">star</span>
+</div>
+</td>
+<td class="py-space-md px-space-md text-center">
+<span class="inline-block px-2.5 py-1 rounded-full bg-surface-container-high text-on-surface font-label-sm text-label-sm font-semibold">
+                    99% On-Time
+                  </span>
+</td>
+<td class="py-space-md px-space-md text-right pr-6">
+<div class="inline-flex items-center gap-2">
+<a class="px-3 py-1.5 rounded-full hover:bg-surface-container text-on-surface font-label-md text-label-md transition-colors" href="#">Profile</a>
+<button class="px-3.5 py-1.5 rounded-full bg-primary text-on-primary font-label-md text-label-md hover:bg-primary-container hover:text-on-surface transition-all" type="button">Invite</button>
+</div>
+</td>
+</tr>
+<!-- ROW 4: Sana AI Lab -->
+<tr class="hover:bg-surface-container-low/60 transition-colors group bg-surface-container-lowest">
+<td class="py-space-md px-space-md text-center">
+<span class="inline-flex items-center justify-center w-7 h-7 rounded-full bg-surface-container text-on-surface-variant font-label-md text-label-md font-semibold">
+                    4
+                  </span>
+</td>
+<td class="py-space-md px-space-md">
+<div class="flex items-center gap-space-sm">
+<div class="w-10 h-10 rounded-full bg-surface-container flex items-center justify-center font-headline-sm text-headline-sm text-secondary">
+                      S
+                    </div>
+<div>
+<span class="font-label-lg text-label-lg font-bold text-on-surface block group-hover:text-secondary transition-colors">Sana AI Lab</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Tokyo • Spatial Acoustics</span>
+</div>
+</div>
+</td>
+<td class="py-space-md px-space-md">
+<span class="px-2.5 py-1 bg-surface-container rounded-md font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wide">
+                    Sonic Engineering
+                  </span>
+</td>
+<td class="py-space-md px-space-md">
+<div class="flex items-center gap-1.5 flex-wrap">
+<span class="font-label-sm text-label-sm px-2 py-0.5 bg-surface-container rounded text-on-surface">ElevenLabs</span>
+<span class="font-label-sm text-label-sm px-2 py-0.5 bg-surface-container rounded text-on-surface">Suno v3</span>
+<span class="font-label-sm text-label-sm px-2 py-0.5 bg-surface-container rounded text-on-surface">Ableton</span>
+</div>
+</td>
+<td class="py-space-md px-space-md text-center font-label-lg text-label-lg text-on-surface">
+                  29
+                </td>
+<td class="py-space-md px-space-md text-center">
+<div class="inline-flex items-center gap-1 font-label-md text-label-md text-on-surface">
+<span class="text-secondary font-bold">4.94</span>
+<span class="material-symbols-outlined text-[14px] text-secondary">star</span>
+</div>
+</td>
+<td class="py-space-md px-space-md text-center">
+<span class="inline-block px-2.5 py-1 rounded-full bg-surface-container-high text-secondary font-label-sm text-label-sm font-bold">
+                    100% On-Time
+                  </span>
+</td>
+<td class="py-space-md px-space-md text-right pr-6">
+<div class="inline-flex items-center gap-2">
+<a class="px-3 py-1.5 rounded-full hover:bg-surface-container text-on-surface font-label-md text-label-md transition-colors" href="#">Profile</a>
+<button class="px-3.5 py-1.5 rounded-full bg-primary text-on-primary font-label-md text-label-md hover:bg-primary-container hover:text-on-surface transition-all" type="button">Invite</button>
+</div>
+</td>
+</tr>
+<!-- ROW 5: Rohan Frames -->
+<tr class="hover:bg-surface-container-low/60 transition-colors group">
+<td class="py-space-md px-space-md text-center">
+<span class="inline-flex items-center justify-center w-7 h-7 rounded-full bg-surface-container text-on-surface-variant font-label-md text-label-md font-semibold">
+                    5
+                  </span>
+</td>
+<td class="py-space-md px-space-md">
+<div class="flex items-center gap-space-sm">
+<div class="w-10 h-10 rounded-full bg-surface-container flex items-center justify-center font-headline-sm text-headline-sm text-secondary">
+                      R
+                    </div>
+<div>
+<span class="font-label-lg text-label-lg font-bold text-on-surface block group-hover:text-secondary transition-colors">Rohan Frames</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Mumbai • Narrative Unit</span>
+</div>
+</div>
+</td>
+<td class="py-space-md px-space-md">
+<span class="px-2.5 py-1 bg-surface-container rounded-md font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wide">
+                    Brand Campaigns
+                  </span>
+</td>
+<td class="py-space-md px-space-md">
+<div class="flex items-center gap-1.5 flex-wrap">
+<span class="font-label-sm text-label-sm px-2 py-0.5 bg-surface-container rounded text-on-surface">Kling AI</span>
+<span class="font-label-sm text-label-sm px-2 py-0.5 bg-surface-container rounded text-on-surface">Premiere Pro</span>
+</div>
+</td>
+<td class="py-space-md px-space-md text-center font-label-lg text-label-lg text-on-surface">
+                  51
+                </td>
+<td class="py-space-md px-space-md text-center">
+<div class="inline-flex items-center gap-1 font-label-md text-label-md text-on-surface">
+<span class="text-secondary font-bold">4.92</span>
+<span class="material-symbols-outlined text-[14px] text-secondary">star</span>
+</div>
+</td>
+<td class="py-space-md px-space-md text-center">
+<span class="inline-block px-2.5 py-1 rounded-full bg-surface-container-high text-on-surface font-label-sm text-label-sm font-semibold">
+                    96% On-Time
+                  </span>
+</td>
+<td class="py-space-md px-space-md text-right pr-6">
+<div class="inline-flex items-center gap-2">
+<a class="px-3 py-1.5 rounded-full hover:bg-surface-container text-on-surface font-label-md text-label-md transition-colors" href="#">Profile</a>
+<button class="px-3.5 py-1.5 rounded-full bg-primary text-on-primary font-label-md text-label-md hover:bg-primary-container hover:text-on-surface transition-all" type="button">Invite</button>
+</div>
+</td>
+</tr>
+<!-- ROW 6: Tara Render -->
+<tr class="hover:bg-surface-container-low/60 transition-colors group bg-surface-container-lowest">
+<td class="py-space-md px-space-md text-center">
+<span class="inline-flex items-center justify-center w-7 h-7 rounded-full bg-surface-container text-on-surface-variant font-label-md text-label-md font-semibold">
+                    6
+                  </span>
+</td>
+<td class="py-space-md px-space-md">
+<div class="flex items-center gap-space-sm">
+<div class="w-10 h-10 rounded-full bg-surface-container flex items-center justify-center font-headline-sm text-headline-sm text-secondary">
+                      T
+                    </div>
+<div>
+<span class="font-label-lg text-label-lg font-bold text-on-surface block group-hover:text-secondary transition-colors">Tara Render</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Milan • Architectural Vision</span>
+</div>
+</div>
+</td>
+<td class="py-space-md px-space-md">
+<span class="px-2.5 py-1 bg-surface-container rounded-md font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wide">
+                    Spatial Architecture
+                  </span>
+</td>
+<td class="py-space-md px-space-md">
+<div class="flex items-center gap-1.5 flex-wrap">
+<span class="font-label-sm text-label-sm px-2 py-0.5 bg-surface-container rounded text-on-surface">Midjourney Arch</span>
+<span class="font-label-sm text-label-sm px-2 py-0.5 bg-surface-container rounded text-on-surface">Photoshop AI</span>
+</div>
+</td>
+<td class="py-space-md px-space-md text-center font-label-lg text-label-lg text-on-surface">
+                  40
+                </td>
+<td class="py-space-md px-space-md text-center">
+<div class="inline-flex items-center gap-1 font-label-md text-label-md text-on-surface">
+<span class="text-secondary font-bold">4.91</span>
+<span class="material-symbols-outlined text-[14px] text-secondary">star</span>
+</div>
+</td>
+<td class="py-space-md px-space-md text-center">
+<span class="inline-block px-2.5 py-1 rounded-full bg-surface-container-high text-on-surface font-label-sm text-label-sm font-semibold">
+                    97% On-Time
+                  </span>
+</td>
+<td class="py-space-md px-space-md text-right pr-6">
+<div class="inline-flex items-center gap-2">
+<a class="px-3 py-1.5 rounded-full hover:bg-surface-container text-on-surface font-label-md text-label-md transition-colors" href="#">Profile</a>
+<button class="px-3.5 py-1.5 rounded-full bg-primary text-on-primary font-label-md text-label-md hover:bg-primary-container hover:text-on-surface transition-all" type="button">Invite</button>
+</div>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<!-- Editorial Footnote & Verification Callout -->
+<div class="p-space-lg bg-surface-container-low rounded-xl flex flex-col md:flex-row items-center justify-between gap-space-md">
+<div class="flex items-start gap-3">
+<span class="material-symbols-outlined text-secondary text-[24px] mt-0.5">verified_user</span>
+<div class="space-y-1">
+<h3 class="font-label-lg text-label-lg font-bold text-on-surface">How Maccall Evaluates SLA &amp; Precision</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant max-w-2xl">
+                Rankings update weekly via smart escrow settlements, delivery timestamp compliance, revision bounds, and blind post-production reviews from commissioning fashion maisons and automotive houses.
+              </p>
+</div>
+</div>
+<a class="px-space-md py-2.5 rounded-full bg-surface-container text-on-surface font-label-lg text-label-lg hover:bg-surface-container-high transition-colors whitespace-nowrap" href="#">
+            Read Provenance Charter
+          </a>
+</div>
+</section>
+<!-- Atmospheric Studio Spotlight Callout Card (Visual Richness with 4th Image Style) -->
+<section class="mt-space-xl p-space-lg lg:p-space-xl bg-surface-container rounded-2xl relative overflow-hidden">
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-space-lg items-center relative z-10">
+<div class="lg:col-span-7 space-y-space-md">
+<span class="font-label-sm text-label-sm uppercase tracking-widest text-secondary font-semibold">Sonic &amp; Synesthetic Curation</span>
+<h2 class="font-headline-lg text-headline-lg text-on-surface leading-tight">
+              Algorithmic Soundscapes and Multi-Track Score Design
+            </h2>
+<p class="font-body-lg text-body-lg text-on-surface-variant max-w-xl">
+              From spatial ambisonics to generative luxury brand anthems, explore verified sonic directors crafting high-fidelity synthetic acoustics for global showcases.
+            </p>
+<div class="pt-2 flex items-center gap-space-md">
+<button class="px-space-lg py-3 rounded-full bg-primary text-on-primary font-label-lg text-label-lg hover:bg-primary-container hover:text-on-surface transition-all shadow-sm" type="button">
+                Explore Sonic Roster
+              </button>
+<a class="font-label-lg text-label-lg text-on-surface hover:text-secondary transition-colors underline underline-offset-4 decoration-outline-variant" href="#">
+                Commission Custom Score
+              </a>
+</div>
+</div>
+<div class="lg:col-span-5">
+<div class="relative rounded-xl overflow-hidden shadow-lg h-72 sm:h-80 bg-surface-container-high">
+<img class="w-full h-full object-cover" data-alt="Modern high-end music and generative audio production studio with digital holographic glowing golden particle soundwaves hovering over a physical futuristic console, sound engineer working with headphones in atmospheric deep blue and warm amber lighting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCPi4uiHAx__nFxu7vTQlnl4fyZywXor8Bj-cofYc6OopJrpuQmcaHLqimHECJzShGWzJq1LdyLx41RnsW-w62h4hKdbGxm41MgNopbep4bLGoFioEjI1LJhQ20M8uSoCTIOMiUcpp4lrqltWf-3cc8jEJQQzlsX_-ZpGhSNiBLniEFqMGu2d8qxoUINT740aHGH9VnLqluZR1Iwu29yJs4zrDOh7unergKfi5R8w8"/>
+<div class="absolute bottom-3 left-3 px-3 py-1 bg-surface/90 backdrop-blur-md rounded-md font-label-sm text-label-sm text-on-surface uppercase tracking-wider">
+                Sana AI Lab • Studio Session 04
+              </div>
+</div>
+</div>
+</div>
+</section>
+</div>
+</div>
+</div></main><footer class="w-full bg-surface-container-low shadow-[0_-1px_6px_rgba(0,0,0,0.02)]"><div class="max-w-7xl mx-auto px-gutter py-space-xl"><div class="grid grid-cols-1 md:grid-cols-12 gap-space-lg mb-space-xl"><div class="md:col-span-5 flex flex-col justify-between pr-0 md:pr-space-lg"><div class="space-y-space-md"><div class="flex items-center gap-space-xs"><img alt="Maccall luxury MC monogram logo with champagne-gold gradient and modern sans wordmark" class="h-7 w-auto object-contain" src="https://lh3.googleusercontent.com/aida/AEtjO1WJX7hESKVA5tVbJQtynmygFiHqkrec04zsg8PxWUnnwI_CUWS3gjmCNh3hoMEkKMq-tJpROC9crcei5tMiqz90tUS9ho2zrmtcAWTXtthqwoUj77cxdNp-yqar3m-25_frRYYXxaCvJPbUzz7xqFBpypB1xTfeAjQyUJt_nvBOyQMt7egJbwDhy0yQLyCgr33qho10NNEmPh4E6yMDMPR2LKAS5cWI-D2vFQ6z2JrM"/><span class="font-headline-sm text-headline-sm text-on-surface ml-1">Maccall</span></div><p class="font-body-md text-body-md text-on-surface-variant max-w-sm">The premier atelier and marketplace curated for distinguished AI visualists, generative authors, and luxury brands seeking timeless intelligence.</p></div><div class="mt-space-lg"><span class="font-label-sm text-label-sm text-secondary uppercase tracking-wider">Curated Atelier • Est. 2024</span></div></div><div class="md:col-span-7 grid grid-cols-3 gap-space-md"><div class="flex flex-col space-y-space-sm"><h3 class="font-label-md text-label-md text-on-surface uppercase tracking-wider mb-space-xs">Marketplace</h3><a class="font-body-sm text-body-sm text-on-surface-variant hover:text-on-surface transition-colors" data-path="discover" href="#">Featured Folios</a><a class="font-body-sm text-body-sm text-on-surface-variant hover:text-on-surface transition-colors" data-path="briefs" href="#">Open Briefs</a><a class="font-body-sm text-body-sm text-on-surface-variant hover:text-on-surface transition-colors" data-path="leaderboard" href="#">Curator Index</a><a class="font-body-sm text-body-sm text-on-surface-variant hover:text-on-surface transition-colors" data-path="commission-concierge" href="#">Concierge Desk</a></div><div class="flex flex-col space-y-space-sm"><h3 class="font-label-md text-label-md text-on-surface uppercase tracking-wider mb-space-xs">Platform</h3><a class="font-body-sm text-body-sm text-on-surface-variant hover:text-on-surface transition-colors" data-path="workspaces" href="#">Creator Studio</a><a class="font-body-sm text-body-sm text-on-surface-variant hover:text-on-surface transition-colors" data-path="community" href="#">Salon Gatherings</a><a class="font-body-sm text-body-sm text-on-surface-variant hover:text-on-surface transition-colors" data-path="provenance" href="#">Model Registry</a><a class="font-body-sm text-body-sm text-on-surface-variant hover:text-on-surface transition-colors" data-path="enterprise-briefs" href="#">Maison Access</a></div><div class="flex flex-col space-y-space-sm"><h3 class="font-label-md text-label-md text-on-surface uppercase tracking-wider mb-space-xs">Governance</h3><a class="font-body-sm text-body-sm text-on-surface-variant hover:text-on-surface transition-colors" data-path="provenance-charter" href="#">Ethics &amp; Lineage</a><a class="font-body-sm text-body-sm text-on-surface-variant hover:text-on-surface transition-colors" data-path="terms-of-curation" href="#">Private Treaties</a><a class="font-body-sm text-body-sm text-on-surface-variant hover:text-on-surface transition-colors" data-path="data-integrity" href="#">IP Integrity</a><a class="font-body-sm text-body-sm text-on-surface-variant hover:text-on-surface transition-colors" data-path="security" href="#">Vault Security</a></div></div></div><div class="pt-space-lg flex flex-col sm:flex-row items-center justify-between gap-space-sm"><p class="font-body-sm text-body-sm text-on-surface-variant">© 2025 Maccall Atelier Inc. Crafted for slow editorial intelligence.</p><div class="flex items-center gap-space-md"><a class="font-body-sm text-body-sm text-on-surface-variant hover:text-on-surface transition-colors" data-path="terms-of-curation" href="#">Terms</a><a class="font-body-sm text-body-sm text-on-surface-variant hover:text-on-surface transition-colors" data-path="data-integrity" href="#">Privacy</a><a class="font-body-sm text-body-sm text-on-surface-variant hover:text-on-surface transition-colors" data-path="provenance-charter" href="#">Provenance Code</a></div></div></div></footer></body></html>

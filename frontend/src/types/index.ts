@@ -180,7 +180,7 @@ export interface Workspace {
   brief_ref: string;
   title: string;
   description: string;
-  status: string; // discovery, production, review, delivered, completed
+  status?: string; // discovery, production, review, delivered, completed
   brand_id: string;
   brand_name: string;
   creator: Creator;
@@ -188,7 +188,7 @@ export interface Workspace {
   milestones: Milestone[];
   deliverables: WorkspaceDeliverable[];
   messages: WorkspaceMessage[];
-  revisions: Revision[];
+  revisions?: Revision[];
   review?: WorkspaceReview | null;
   unread_count: number;
   stage_tag: string;

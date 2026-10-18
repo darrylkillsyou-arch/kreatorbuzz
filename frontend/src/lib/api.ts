@@ -1,6 +1,6 @@
 import type { Creator, Brief, CommunityPost, PostCommentItem, Workspace, User, Proposal, AppNotification, RecommendedCreator, XeroChatResponse } from '../types';
 
-import { INITIAL_CREATORS, INITIAL_WORKSPACES, LEADERBOARD_STATS } from './mockData';
+import { INITIAL_CREATORS, INITIAL_WORKSPACES } from './mockData';
 import { getCreatorAvatar, getCreatorHeroImage } from './creatorImages';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '/api';

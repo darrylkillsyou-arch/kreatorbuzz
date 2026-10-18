@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { api } from '../lib/api';
 import { useAuth } from '../contexts/AuthContext';
 import type { Creator, RecommendedCreator, XeroProjectPlan, XeroChatMessage } from '../types';
@@ -15,7 +15,6 @@ function formatINR(amount: number): string {
 }
 
 export const BriefsPage: React.FC = () => {
-  const navigate = useNavigate();
   const { user } = useAuth();
   const chatBottomRef = useRef<HTMLDivElement>(null);
 
@@ -42,7 +41,7 @@ export const BriefsPage: React.FC = () => {
   // Save Brief State
   const [isSavingBrief, setIsSavingBrief] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
-  const [savedBriefId, setSavedBriefId] = useState<number | null>(null);
+  const [savedBriefId, setSavedBriefId] = useState<string | number | null>(null);
 
   // Initial load: restore existing session if available
   useEffect(() => {
@@ -607,10 +606,9 @@ export const BriefsPage: React.FC = () => {
                             <div className="flex items-start justify-between gap-2">
                               <div className="flex items-center gap-2">
                                 <CreatorAvatar
-                                  avatar={c.avatar}
+                                  src={c.avatar}
                                   name={c.name}
                                   size="md"
-                                  isVerified={c.is_verified}
                                 />
                                 <div>
                                   <h4 className="font-label-lg font-bold text-on-surface text-xs truncate max-w-[120px]">

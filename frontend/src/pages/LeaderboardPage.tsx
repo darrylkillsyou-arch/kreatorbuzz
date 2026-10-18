@@ -3,10 +3,6 @@ import { Link, useNavigate } from 'react-router-dom';
 import { api } from '../lib/api';
 import type {
   MonthlyLeaderboardData,
-  MonthlyRankedCreator,
-  MonthlySummaryStats,
-  MonthlyAward,
-  CategoryTopCreators,
 } from '../types';
 import { LoadingSpinner } from '../components/LoadingSpinner';
 import { getCreatorAvatar } from '../lib/creatorImages';

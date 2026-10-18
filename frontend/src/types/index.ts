@@ -144,7 +144,7 @@ export interface WorkspaceDeliverable {
   resolution: string;
   file_size: string;
   mime_type?: string;
-  version: number;
+  version?: number;
   url: string;
   status: string;
   created_at?: string;
@@ -263,8 +263,13 @@ export interface MonthlyLeaderboardData {
   total_qualifying_creators: number;
 }
 
-// Backward compatibility aliases
-export type LeaderboardStats = MonthlySummaryStats;
+// Backward compatibility types
+export interface LeaderboardStats {
+  median_sla?: string;
+  total_briefs?: number;
+  escrow_integrity?: string;
+  [key: string]: any;
+}
 export type RankedCreator = MonthlyRankedCreator;
 export type DynamicLeaderboardData = MonthlyLeaderboardData;
 

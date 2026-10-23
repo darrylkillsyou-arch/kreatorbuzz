@@ -36,7 +36,8 @@ from app.schemas.workspaces import (
     ReviewCreate,
     ReviewResponse,
 )
-from app.dependencies import get_current_user
+from app.config import settings
+from app.dependencies import get_current_user, get_optional_current_user
 from app.services.encryption import encrypt_message, decrypt_message
 
 router = APIRouter(prefix="/workspaces", tags=["workspaces"])
@@ -376,7 +377,11 @@ ALLOWED_EXTENSIONS = {
 }
 
 MAX_FILE_SIZE = 50 * 1024 * 1024  # 50 MB
-UPLOAD_BASE_DIR = Path(__file__).resolve().parent.parent.parent / "uploads" / "workspaces"
+UPLOAD_DIR_ENV = os.environ.get("UPLOADS_DIR")
+if UPLOAD_DIR_ENV:
+    UPLOAD_BASE_DIR = Path(UPLOAD_DIR_ENV)
+else:
+    UPLOAD_BASE_DIR = Path(__file__).resolve().parent.parent.parent / "uploads" / "workspaces"
 
 
 def sanitize_filename(filename: str) -> str:
@@ -532,16 +537,20 @@ def download_workspace_file(
     workspace_id: int,
     file_id: int,
     token: Optional[str] = Query(None),
-    current_user: Optional[User] = Depends(get_current_user),
+    current_user: Optional[User] = Depends(get_optional_current_user),
     db: Session = Depends(get_db),
 ):
     """Securely downloads a workspace deliverable with strict membership check."""
     # Allow token query parameter for direct browser anchor tags if needed
     if not current_user and token:
-        from app.services.auth import decode_token
-        payload = decode_token(token)
-        if payload and "sub" in payload:
-            current_user = db.query(User).filter(User.email == payload["sub"]).first()
+        try:
+            from jose import jwt
+            payload = jwt.decode(token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM])
+            user_id_str = payload.get("sub")
+            if user_id_str:
+                current_user = db.query(User).filter(User.id == int(user_id_str), User.is_active == True).first()
+        except Exception:
+            current_user = None
 
     if not current_user:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Authentication required")

@@ -112,7 +112,7 @@ export const LeaderboardPage: React.FC = () => {
               Creator Leaderboard
             </h1>
             <p className="font-body-lg text-body-lg text-on-surface-variant leading-relaxed">
-              Who performed best on CODE XERO this month? Dynamic rankings calculated exclusively from real client projects, milestone approvals, and verified reviews.
+              Who performed best on KreatorBuzz this month? Dynamic rankings calculated exclusively from real client projects, milestone approvals, and verified reviews.
             </p>
           </div>
 

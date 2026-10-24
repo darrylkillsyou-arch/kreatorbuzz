@@ -261,16 +261,23 @@ export function normalizeWorkspace(raw: any): Workspace {
   const totalBudget = milestones.reduce((sum: number, m: any) => sum + (m.amount || 0), 0);
 
   const rawRevisions = Array.isArray(raw.revisions) ? raw.revisions : [];
-  const revisions = rawRevisions.map((r: any) => ({
-    id: r.id,
-    milestone_id: r.milestone_id ?? null,
-    workspace_id: r.workspace_id,
-    requester_id: r.requester_id,
-    description: r.description,
-    status: r.status || 'open',
-    created_at: r.created_at ? new Date(r.created_at).toLocaleString('en-IN') : '',
-    requester: r.requester ? { id: r.requester.id, full_name: r.requester.full_name, email: r.requester.email } : undefined,
-  }));
+  const revisions = rawRevisions.map((r: any) => {
+    let status = r.status || 'requested';
+    if (status === 'open') status = 'requested';
+    if (status === 'addressed') status = 'submitted';
+    if (status === 'resolved') status = 'approved';
+    return {
+      id: r.id,
+      milestone_id: r.milestone_id ?? null,
+      workspace_id: r.workspace_id,
+      requester_id: r.requester_id,
+      description: r.description,
+      status,
+      response_notes: r.response_notes,
+      created_at: r.created_at ? new Date(r.created_at).toLocaleString('en-IN') : '',
+      requester: r.requester ? { id: r.requester.id, full_name: r.requester.full_name, email: r.requester.email } : undefined,
+    };
+  });
 
   const creatorObj: Creator = {
     id: creatorId,
@@ -311,9 +318,17 @@ export function normalizeWorkspace(raw: any): Workspace {
       version: f.version || 1,
       url: f.download_url || `/api/workspaces/${raw.id}/files/${f.id}/download`,
       status: f.status || 'submitted',
+      description: f.description,
+      client_feedback: f.client_feedback,
+      width: f.width ?? null,
+      height: f.height ?? null,
+      duration_seconds: f.duration_seconds ?? null,
+      deliverable_type: f.deliverable_type ?? null,
+      is_current: f.is_current,
       created_at: f.created_at ? new Date(f.created_at).toLocaleString('en-IN') : '',
       uploader_id: f.uploader_id,
       uploader_name: f.uploader?.full_name || (f.uploader_id === raw.creator_user_id ? creatorName : brandUser?.full_name || 'Team'),
+      buzz_check: f.buzz_check || null,
     })) : [],
     messages,
     revisions,
@@ -327,6 +342,10 @@ export function normalizeWorkspace(raw: any): Workspace {
       created_at: raw.review.created_at ? new Date(raw.review.created_at).toLocaleDateString('en-IN', { month: 'short', day: 'numeric', year: 'numeric' }) : '',
       recruiter: raw.review.recruiter,
     } : null,
+    agreed_licensing: raw.agreed_licensing,
+    timeline: raw.timeline,
+    brief: raw.brief,
+    health: raw.health || null,
     unread_count: 0,
     status: raw.status || 'discovery',
     stage_tag: raw.status === 'completed' ? 'Completed' : (raw.status === 'delivered' ? 'Delivered' : 'Production (Active)'),
@@ -788,6 +807,21 @@ export const api = {
         body: JSON.stringify({ milestone_id: milestoneId ? Number(milestoneId) : null, description: notes })
       });
     },
+    updateRevisionStatus: async (workspaceId: string, revisionId: number | string, status: 'requested' | 'in_progress' | 'submitted' | 'approved', responseNotes?: string) => {
+      return await request<any>(`/workspaces/${workspaceId}/revision-requests/${revisionId}`, {
+        method: 'PATCH',
+        body: JSON.stringify({ status, response_notes: responseNotes })
+      });
+    },
+    submitDeliverableFeedback: async (workspaceId: string, fileId: number | string, data: { client_feedback?: string; status?: string }) => {
+      return await request<any>(`/workspaces/${workspaceId}/deliverables/${fileId}/feedback`, {
+        method: 'POST',
+        body: JSON.stringify(data),
+      });
+    },
+    getDeliveryCheck: async (workspaceId: string, fileId: number | string): Promise<any> => {
+      return await request<any>(`/workspaces/${workspaceId}/deliverables/${fileId}/delivery-check`);
+    },
     uploadDeliverable: async (workspaceId: string, formData: FormData): Promise<any> => {
       const response = await fetch(`/api/workspaces/${workspaceId}/deliverables`, {
         method: 'POST',
@@ -817,19 +851,40 @@ export const api = {
     getCreatorReviews: async (creatorId: string): Promise<any[]> => {
       return await request<any[]>(`/workspaces/creators/${creatorId}/reviews`);
     },
+    getProjectHealth: async (workspaceId: string): Promise<any> => {
+      return await request<any>(`/workspaces/${workspaceId}/health`);
+    },
+    getRescueDetails: async (workspaceId: string): Promise<any> => {
+      return await request<any>(`/workspaces/${workspaceId}/rescue`);
+    },
+    submitRescueAction: async (workspaceId: string, actionData: { action: string; notes?: string; replacement_creator_id?: number }): Promise<any> => {
+      return await request<any>(`/workspaces/${workspaceId}/rescue/action`, {
+        method: 'POST',
+        body: JSON.stringify(actionData),
+      });
+    },
   },
 
   shortlist: {
-    add: async (creatorId: string, creatorUserId?: string) => {
-      const numId = Number(creatorId);
-      const numUserId = creatorUserId ? Number(creatorUserId) : undefined;
-      return await request<any>('/shortlist', {
-        method: 'POST',
-        body: JSON.stringify({
-          creator_id: creatorId,
+    add: async (
+      target: string | { creator_id?: string; creator_profile_id?: number; creator_user_id?: number; brief_id?: number },
+      creatorUserId?: string
+    ) => {
+      let payload: any = {};
+      if (typeof target === 'object' && target !== null) {
+        payload = target;
+      } else {
+        const numId = Number(target);
+        const numUserId = creatorUserId ? Number(creatorUserId) : undefined;
+        payload = {
+          creator_id: target,
           creator_profile_id: !isNaN(numId) ? numId : undefined,
           creator_user_id: numUserId,
-        }),
+        };
+      }
+      return await request<any>('/shortlist', {
+        method: 'POST',
+        body: JSON.stringify(payload),
       });
     },
     list: async (): Promise<Creator[]> => {
@@ -943,6 +998,48 @@ export const api = {
       } catch {
         return { success: true };
       }
+    },
+  },
+
+  comparison: {
+    compare: async (data: {
+      creator_ids: number[];
+      brief_id?: number;
+      target_category?: string;
+      budget?: number;
+      timeline_days?: number;
+    }) => {
+      return await request<any>('/comparison/compare', {
+        method: 'POST',
+        body: JSON.stringify(data),
+      });
+    },
+    getCreatorTrust: async (creatorId: number) => {
+      return await request<any>(`/comparison/trust/${creatorId}`);
+    },
+    getRecruiterTrust: async (userId: number) => {
+      return await request<any>(`/comparison/recruiter-trust/${userId}`);
+    },
+    createBlindArena: async (data: {
+      creator_ids: number[];
+      brief_id?: number;
+      target_category?: string;
+      budget?: number;
+      timeline_days?: number;
+    }) => {
+      return await request<any>('/comparison/blind-arena', {
+        method: 'POST',
+        body: JSON.stringify(data),
+      });
+    },
+    revealBlind: async (data: {
+      blind_token: string;
+      all_tokens: string[];
+    }) => {
+      return await request<any>('/comparison/blind-arena/reveal', {
+        method: 'POST',
+        body: JSON.stringify(data),
+      });
     },
   },
 };

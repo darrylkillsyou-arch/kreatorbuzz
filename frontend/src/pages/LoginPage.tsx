@@ -42,13 +42,13 @@ export const LoginPage: React.FC = () => {
       <div className="max-w-md w-full bg-surface-container-low rounded-2xl p-space-lg md:p-space-xl border border-outline-variant/40 shadow-sm space-y-space-md">
         <div className="text-center space-y-space-xs">
           <div className="flex justify-center">
-            <BrandMark size="lg" />
+            <BrandMark size="lg" showTagline />
           </div>
           <h1 className="font-headline-md text-headline-md text-on-surface">
-            Sign in to CODE XERO
+            Sign in to KreatorBuzz
           </h1>
           <p className="font-body-sm text-body-sm text-on-surface-variant">
-            Enter your email and password to access workspaces and projects.
+            Enter your email and password to access workspaces, proposals, and projects.
           </p>
 
           {/* Demo Accounts — Password: Demo@123 */}

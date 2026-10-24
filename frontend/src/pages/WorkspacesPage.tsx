@@ -1,17 +1,29 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
 import { api } from '../lib/api';
 import { useAuth } from '../contexts/AuthContext';
 import type { Workspace, Milestone } from '../types';
 import { LoadingSpinner } from '../components/LoadingSpinner';
+import { ProductionTimeline } from '../components/workspace/ProductionTimeline';
+import { AgreedUsageRights } from '../components/workspace/AgreedUsageRights';
+import { ConfirmedBriefCard } from '../components/workspace/ConfirmedBriefCard';
+import { DeliverableVersionHistory } from '../components/workspace/DeliverableVersionHistory';
+import { RevisionFlowPanel } from '../components/workspace/RevisionFlowPanel';
+import { ProjectHealthCard } from '../components/workspace/ProjectHealthCard';
+import { ProjectRescueModal } from '../components/workspace/ProjectRescueModal';
+
+export type WorkspaceTab = 'overview' | 'messages' | 'deliverables' | 'revisions' | 'usage_rights' | 'chat' | 'assets' | 'legal';
 
 export const WorkspacesPage: React.FC = () => {
   const [searchParams] = useSearchParams();
   const [workspaces, setWorkspaces] = useState<Workspace[]>([]);
   const [selectedWs, setSelectedWs] = useState<Workspace | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<'deliverables' | 'chat' | 'assets' | 'legal'>('deliverables');
+  const [loadingError, setLoadingError] = useState<string | null>(null);
+  const [isDetailLoading, setIsDetailLoading] = useState(false);
+  const [activeTab, setActiveTab] = useState<WorkspaceTab>('overview');
   const [chatMessage, setChatMessage] = useState('');
+  const [isSendingMessage, setIsSendingMessage] = useState(false);
   const [revisionNotes, setRevisionNotes] = useState('');
   const [showRevisionModal, setShowRevisionModal] = useState(false);
   const [targetMilestoneForRevision, setTargetMilestoneForRevision] = useState<Milestone | null>(null);
@@ -34,29 +46,145 @@ export const WorkspacesPage: React.FC = () => {
   // Completion State
   const [isCompleting, setIsCompleting] = useState(false);
 
+  // Project Rescue State
+  const [showRescueModal, setShowRescueModal] = useState(false);
+  const [rescueModalAction, setRescueModalAction] = useState<'adjust_plan' | 'replacement'>('adjust_plan');
+
+  // Chat auto-scroll reference
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+  const { user } = useAuth();
+
   useEffect(() => {
     loadWorkspaces();
   }, []);
 
-  const loadWorkspaces = async () => {
+  // Sync selection when query parameter changes
+  useEffect(() => {
+    const queryId = searchParams.get('id');
+    if (queryId && workspaces.length > 0 && selectedWs?.id !== queryId) {
+      const match = workspaces.find((w) => w.id === queryId);
+      if (match) {
+        handleSelectWorkspace(match);
+      }
+    }
+  }, [searchParams]);
+
+  // Periodic background message sync when a workspace is active
+  useEffect(() => {
+    if (!selectedWs?.id) return;
+    const interval = setInterval(async () => {
+      try {
+        const rawMsgs = await api.workspaces.getMessages(selectedWs.id);
+        if (Array.isArray(rawMsgs)) {
+          const normalized = rawMsgs.map((msg: any) => {
+            const msgIsBrand = msg.sender_id === Number(selectedWs.brand_id) || msg.sender?.role === 'brand';
+            return {
+              id: String(msg.id),
+              sender_id: String(msg.sender_id),
+              sender_name: msg.sender?.full_name || (msgIsBrand ? 'Recruiter' : selectedWs.creator.name),
+              sender_avatar: msg.sender?.avatar_url,
+              sender_role: (msg.sender?.role === 'brand' || msgIsBrand ? 'brand' : msg.sender?.role === 'system' ? 'system' : 'creator') as 'brand' | 'creator' | 'system',
+              content: msg.content || '',
+              created_at: msg.created_at ? new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'Recently',
+            };
+          });
+
+          setSelectedWs((prev) => {
+            if (!prev || prev.id !== selectedWs.id) return prev;
+            if (
+              normalized.length !== prev.messages.length ||
+              (normalized.length > 0 && normalized[normalized.length - 1].id !== prev.messages[prev.messages.length - 1]?.id)
+            ) {
+              return { ...prev, messages: normalized };
+            }
+            return prev;
+          });
+        }
+      } catch {
+        // silent background sync error handling
+      }
+    }, 4000);
+
+    return () => clearInterval(interval);
+  }, [selectedWs?.id, user?.role]);
+
+  // Auto-scroll chat to latest message
+  useEffect(() => {
+    if (activeTab === 'chat' || activeTab === 'messages') {
+      messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    }
+  }, [selectedWs?.messages, activeTab]);
+
+  const loadWorkspaces = async (targetId?: string) => {
     setIsLoading(true);
+    setLoadingError(null);
     try {
       const list = await api.workspaces.list();
       setWorkspaces(list);
-      const queryId = searchParams.get('id');
-      const current = queryId ? list.find((w) => w.id === queryId) || list[0] : list[0];
-      setSelectedWs(current || null);
+      const queryId = targetId || searchParams.get('id');
+      const activeSummary = queryId ? list.find((w) => w.id === queryId) || list[0] : list[0];
+      if (activeSummary) {
+        try {
+          const detail = await api.workspaces.getById(activeSummary.id);
+          setSelectedWs(detail);
+        } catch {
+          setSelectedWs(activeSummary);
+        }
+      } else {
+        setSelectedWs(null);
+      }
+    } catch (err: any) {
+      setLoadingError(err.message || 'Failed to load project workspaces.');
+      setWorkspaces([]);
+      setSelectedWs(null);
     } finally {
       setIsLoading(false);
     }
   };
 
+  const handleSelectWorkspace = async (wsSummary: Workspace) => {
+    if (selectedWs?.id === wsSummary.id) return;
+    setSelectedWs(wsSummary);
+    setIsDetailLoading(true);
+    try {
+      const detailed = await api.workspaces.getById(wsSummary.id);
+      setSelectedWs(detailed);
+    } catch {
+      setSelectedWs(wsSummary);
+    } finally {
+      setIsDetailLoading(false);
+    }
+  };
+
+  const handleContinueWithCreator = async () => {
+    if (!selectedWs) return;
+    try {
+      await api.workspaces.submitRescueAction(selectedWs.id, {
+        action: 'continue_with_creator',
+        notes: 'Recruiter reviewed project health and affirmed continuation with creator.',
+      });
+      const updated = await api.workspaces.getById(selectedWs.id);
+      setSelectedWs(updated);
+    } catch (err: any) {
+      alert(`Action failed: ${err.message || 'Unknown error'}`);
+    }
+  };
+
   const handleSendMessage = async () => {
-    if (!chatMessage.trim() || !selectedWs) return;
-    await api.workspaces.sendMessage(selectedWs.id, chatMessage);
-    const updated = await api.workspaces.getById(selectedWs.id);
-    setSelectedWs(updated);
+    if (!chatMessage.trim() || !selectedWs || isSendingMessage) return;
+    const msgText = chatMessage.trim();
     setChatMessage('');
+    setIsSendingMessage(true);
+    try {
+      await api.workspaces.sendMessage(selectedWs.id, msgText);
+      const updated = await api.workspaces.getById(selectedWs.id);
+      setSelectedWs(updated);
+    } catch (err: any) {
+      alert(`Failed to send message: ${err.message || 'Unknown error'}`);
+      setChatMessage(msgText);
+    } finally {
+      setIsSendingMessage(false);
+    }
   };
 
   const handleApproveMilestone = async (milestoneId: string) => {
@@ -65,6 +193,7 @@ export const WorkspacesPage: React.FC = () => {
       await api.workspaces.updateMilestone(selectedWs.id, milestoneId, 'completed');
       const updated = await api.workspaces.getById(selectedWs.id);
       setSelectedWs(updated);
+      setWorkspaces((prev) => prev.map((w) => (w.id === updated.id ? updated : w)));
       alert('Milestone approved. Escrow tranche released to creator.');
     } catch (err: any) {
       alert(`Failed to approve milestone: ${err.message || 'Unknown error'}`);
@@ -111,6 +240,7 @@ export const WorkspacesPage: React.FC = () => {
       await api.workspaces.uploadDeliverable(selectedWs.id, formData);
       const updated = await api.workspaces.getById(selectedWs.id);
       setSelectedWs(updated);
+      setWorkspaces((prev) => prev.map((w) => (w.id === updated.id ? updated : w)));
       setShowUploadModal(false);
       setUploadFile(null);
       setUploadDescription('');
@@ -130,7 +260,6 @@ export const WorkspacesPage: React.FC = () => {
     try {
       const updated = await api.workspaces.completeProject(selectedWs.id);
       setSelectedWs(updated);
-      // update list
       setWorkspaces((prev) => prev.map((w) => (w.id === updated.id ? updated : w)));
       alert('Project marked as completed! You can now leave a verified creator review.');
     } catch (err: any) {
@@ -159,10 +288,32 @@ export const WorkspacesPage: React.FC = () => {
     }
   };
 
-  const { user } = useAuth();
-
   if (isLoading) {
     return <LoadingSpinner message="Opening project workspaces..." />;
+  }
+
+  if (loadingError) {
+    return (
+      <div className="max-w-7xl mx-auto w-full px-gutter py-space-xl">
+        <div className="bg-surface-container-low rounded-2xl p-space-xl text-center border border-error/30 max-w-xl mx-auto space-y-4 shadow-sm">
+          <div className="w-14 h-14 rounded-full bg-error/10 text-error mx-auto flex items-center justify-center">
+            <span className="material-symbols-outlined text-[28px]">error</span>
+          </div>
+          <h2 className="font-headline-md text-headline-md text-on-surface">Failed to load workspaces</h2>
+          <p className="font-body-md text-body-md text-on-surface-variant leading-relaxed">
+            {loadingError}
+          </p>
+          <div className="pt-2">
+            <button
+              onClick={() => loadWorkspaces()}
+              className="px-space-lg py-2.5 rounded-full bg-primary text-on-primary font-label-lg hover:bg-primary-container hover:text-on-surface transition-all shadow-sm cursor-pointer"
+            >
+              Retry
+            </button>
+          </div>
+        </div>
+      </div>
+    );
   }
 
   if (workspaces.length === 0 || !selectedWs) {
@@ -232,30 +383,28 @@ export const WorkspacesPage: React.FC = () => {
               Recruiter & Creator Workspaces
             </h1>
             <p className="font-body-md text-body-md text-on-surface-variant">
-              Manage production rooms, milestone reviews, approvals, and usage rights in one place.
+              Manage workspaces, milestone reviews, approvals, and deliverable versioning in one place.
             </p>
           </div>
           <div className="flex items-center gap-space-sm flex-shrink-0">
-            {user?.role === 'creator' && (
+            <Link
+              to="/requests"
+              className="px-space-md py-2.5 rounded-full bg-secondary/15 text-secondary hover:bg-secondary/25 transition-colors flex items-center gap-space-xs shadow-sm font-label-lg"
+            >
+              <span className="material-symbols-outlined text-[18px]">
+                {user?.role === 'brand' ? 'send' : 'inbox'}
+              </span>
+              <span>{user?.role === 'brand' ? 'Sent Proposals' : 'Project Requests'}</span>
+            </Link>
+            {user?.role === 'brand' && (
               <Link
-                to="/requests"
-                className="px-space-md py-2.5 rounded-full bg-secondary/15 text-secondary hover:bg-secondary/25 transition-colors flex items-center gap-space-xs shadow-sm font-label-lg"
+                to="/discover"
+                className="px-space-md py-2.5 rounded-full bg-primary text-on-primary font-label-lg text-label-lg hover:bg-primary-container hover:text-on-surface transition-all flex items-center gap-space-xs shadow-sm cursor-pointer"
               >
-                <span className="material-symbols-outlined text-[18px]">inbox</span>
-                <span>Project Requests</span>
+                <span className="material-symbols-outlined text-[18px]">add</span>
+                <span>New Project Proposal</span>
               </Link>
             )}
-            <button className="px-space-md py-2.5 rounded-full bg-surface-container-high text-on-surface font-label-lg text-label-lg hover:bg-surface-container-highest transition-colors flex items-center gap-space-xs shadow-sm cursor-pointer">
-              <span className="material-symbols-outlined text-[18px]">tune</span>
-              <span>Room Settings</span>
-            </button>
-            <button
-              onClick={() => alert('To open a new production room, generate a brief or hire a creator.')}
-              className="px-space-md py-2.5 rounded-full bg-primary text-on-primary font-label-lg text-label-lg hover:bg-primary-container hover:text-on-surface transition-all flex items-center gap-space-xs shadow-sm cursor-pointer"
-            >
-              <span className="material-symbols-outlined text-[18px]">add</span>
-              <span>New workspace</span>
-            </button>
           </div>
         </div>
       </section>
@@ -269,7 +418,7 @@ export const WorkspacesPage: React.FC = () => {
               <div className="flex items-center justify-between pb-space-sm mb-space-sm border-b border-surface-container-high">
                 <div className="flex items-center gap-space-xs">
                   <span className="font-label-md text-label-md uppercase tracking-wider text-on-surface font-semibold">
-                    Active Production Rooms
+                    Active Workspaces
                   </span>
                   <span className="bg-surface-container-highest text-on-surface-variant font-label-sm text-label-sm px-2 py-0.5 rounded-full">
                     {workspaces.length}
@@ -283,7 +432,7 @@ export const WorkspacesPage: React.FC = () => {
                   return (
                     <div
                       key={ws.id}
-                      onClick={() => setSelectedWs(ws)}
+                      onClick={() => handleSelectWorkspace(ws)}
                       className={`group relative p-space-md rounded-lg cursor-pointer transition-all border ${
                         isSelected
                           ? 'bg-surface-container-lowest shadow-sm border-secondary/40'
@@ -292,7 +441,7 @@ export const WorkspacesPage: React.FC = () => {
                     >
                       <div className="flex items-start justify-between gap-space-xs mb-space-xs">
                         <span className="font-label-sm text-label-sm text-secondary uppercase tracking-widest font-semibold truncate">
-                          {ws.category_tag}
+                          Workspace #{ws.id}
                         </span>
                         {ws.unread_count > 0 && (
                           <span className="inline-flex items-center gap-1 text-[11px] font-label-sm font-semibold text-on-surface bg-secondary-fixed/40 px-2 py-0.5 rounded-full">
@@ -301,15 +450,15 @@ export const WorkspacesPage: React.FC = () => {
                         )}
                       </div>
                       <h2 className="font-headline-sm text-headline-sm text-on-surface leading-snug group-hover:text-secondary transition-colors">
-                        {ws.creator.name}
+                        {user?.role === 'creator' ? ws.brand_name || 'Recruiter' : ws.creator.name}
                       </h2>
                       <p className="font-body-sm text-body-sm text-on-surface-variant mt-0.5 truncate">
                         {ws.title}
                       </p>
                       <div className="mt-space-sm pt-space-xs flex items-center justify-between">
                         <span className="inline-flex items-center gap-1.5 text-on-surface font-label-sm text-label-sm bg-surface-container-high px-2.5 py-1 rounded-full">
-                          <span className="w-1.5 h-1.5 rounded-full bg-secondary animate-pulse"></span>
-                          {ws.stage_tag}
+                          <span className="w-1.5 h-1.5 rounded-full bg-secondary"></span>
+                          <span className="capitalize">{ws.status || 'Active'}</span>
                         </span>
                         <span className="font-label-sm text-label-sm text-on-surface-variant font-semibold">
                           ₹{ws.total_budget.toLocaleString('en-IN')} Total
@@ -330,20 +479,26 @@ export const WorkspacesPage: React.FC = () => {
                 </span>
               </div>
               <p className="font-body-sm text-body-sm text-on-surface-variant leading-relaxed">
-                Client funds stay in CODE XERO escrow. Payments release only after you approve each milestone.
+                Client funds stay safely protected in escrow. Payments release only after you approve each deliverable milestone.
               </p>
             </div>
           </aside>
 
-          {/* Right Column: Room Details */}
+          {/* Right Column: Workspace Details */}
           <main className="lg:col-span-8 flex flex-col gap-space-md">
             {/* Project Header Banner Card */}
-            <div className="bg-surface-container-low rounded-xl p-space-lg shadow-sm border border-outline-variant/30">
+            <div className="bg-surface-container-low rounded-xl p-space-lg shadow-sm border border-outline-variant/30 relative">
+              {isDetailLoading && (
+                <div className="absolute top-2 right-4 flex items-center gap-1 text-[11px] text-secondary font-label-sm animate-pulse">
+                  <span className="w-2 h-2 rounded-full bg-secondary animate-ping"></span>
+                  Syncing workspace...
+                </div>
+              )}
               <div className="flex flex-col md:flex-row md:items-start justify-between gap-space-md">
                 <div className="space-y-space-xs">
                   <div className="flex items-center gap-space-xs flex-wrap">
                     <span className="px-2.5 py-0.5 rounded-full bg-secondary-fixed/50 text-on-secondary-fixed text-label-sm font-label-sm uppercase tracking-wide">
-                      Project #{selectedWs.brief_ref}
+                      Workspace #{selectedWs.id}
                     </span>
                     <span className="text-on-surface-variant font-label-sm text-label-sm">
                       Initiated {selectedWs.created_at}
@@ -357,7 +512,7 @@ export const WorkspacesPage: React.FC = () => {
                   </p>
                 </div>
 
-                {/* Creator Mini Card */}
+                {/* Creator / Recruiter Mini Card */}
                 <div className="bg-surface-container-lowest p-space-md rounded-xl flex items-center gap-space-sm shadow-sm flex-shrink-0 border border-outline-variant/20">
                   <div className="relative w-12 h-12 rounded-full overflow-hidden bg-surface-container-high flex-shrink-0">
                     <img
@@ -369,19 +524,19 @@ export const WorkspacesPage: React.FC = () => {
                   <div>
                     <div className="flex items-center gap-1">
                       <span className="font-label-lg text-label-lg text-on-surface font-semibold">
-                        {selectedWs.creator.name}
+                        {user?.role === 'creator' ? selectedWs.brand_name || 'Recruiter' : selectedWs.creator.name}
                       </span>
                       <span className="material-symbols-outlined text-[16px] text-secondary">verified</span>
                     </div>
                     <span className="font-body-sm text-body-sm text-on-surface-variant block">
-                      Lead Content Creator
+                      {user?.role === 'creator' ? 'Client / Recruiter' : 'Lead Content Creator'}
                     </span>
                     <button
-                      onClick={() => setActiveTab('chat')}
+                      onClick={() => setActiveTab('messages')}
                       className="mt-1 font-label-sm text-label-sm text-secondary hover:text-on-surface uppercase tracking-wider transition-colors flex items-center gap-0.5 cursor-pointer"
                     >
                       <span className="material-symbols-outlined text-[14px]">forum</span>
-                      <span>Direct Message</span>
+                      <span>Workspace Chat</span>
                     </button>
                   </div>
                 </div>
@@ -446,7 +601,7 @@ export const WorkspacesPage: React.FC = () => {
                   <span className="text-on-surface font-semibold">Escrow Milestone Progress</span>
                   <span>Overall: {progressPercent}% Fulfilled</span>
                 </div>
-                <div className="grid grid-cols-4 gap-2 pt-space-xs">
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-space-xs">
                   {selectedWs.milestones.map((m, idx) => (
                     <div key={m.id} className="flex flex-col gap-1.5">
                       <div
@@ -469,25 +624,35 @@ export const WorkspacesPage: React.FC = () => {
 
             {/* Workspace Tabs Navigation & Actions */}
             <div className="flex items-center justify-between border-b border-surface-container-high pb-2 flex-wrap gap-2">
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 flex-wrap">
                 {[
-                  { id: 'deliverables', label: 'Milestone Deliverables' },
-                  { id: 'chat', label: 'Room Chat' },
-                  { id: 'assets', label: `Shared Files (${selectedWs.deliverables.length})` },
-                  { id: 'legal', label: 'Usage Rights' },
-                ].map((tab) => (
-                  <button
-                    key={tab.id}
-                    onClick={() => setActiveTab(tab.id as any)}
-                    className={`px-4 py-2 font-label-md text-label-md rounded-full transition-colors cursor-pointer ${
-                      activeTab === tab.id
-                        ? 'bg-primary text-on-primary'
-                        : 'bg-surface-container hover:bg-surface-container-high text-on-surface'
-                    }`}
-                  >
-                    {tab.label}
-                  </button>
-                ))}
+                  { id: 'overview', label: 'Overview', icon: 'dashboard' },
+                  { id: 'messages', label: `Messages (${selectedWs.messages.length})`, icon: 'forum' },
+                  { id: 'deliverables', label: `Deliverables (${selectedWs.deliverables.length})`, icon: 'inventory_2' },
+                  { id: 'revisions', label: `Revisions (${selectedWs.revisions?.length || 0})`, icon: 'rule' },
+                  { id: 'usage_rights', label: 'Usage Rights', icon: 'verified_user' },
+                ].map((tab) => {
+                  const isActive =
+                    activeTab === tab.id ||
+                    (tab.id === 'messages' && (activeTab as string) === 'chat') ||
+                    (tab.id === 'deliverables' && (activeTab as string) === 'assets') ||
+                    (tab.id === 'usage_rights' && (activeTab as string) === 'legal');
+
+                  return (
+                    <button
+                      key={tab.id}
+                      onClick={() => setActiveTab(tab.id as any)}
+                      className={`px-4 py-2 font-label-md text-label-md rounded-full transition-colors cursor-pointer flex items-center gap-1.5 ${
+                        isActive
+                          ? 'bg-primary text-on-primary'
+                          : 'bg-surface-container hover:bg-surface-container-high text-on-surface'
+                      }`}
+                    >
+                      <span className="material-symbols-outlined text-[16px]">{tab.icon}</span>
+                      <span>{tab.label}</span>
+                    </button>
+                  );
+                })}
               </div>
 
               {/* Upload Deliverable button for Creator */}
@@ -502,276 +667,262 @@ export const WorkspacesPage: React.FC = () => {
               )}
             </div>
 
-            {/* Tab: Deliverables */}
-            {activeTab === 'deliverables' && (
-              <div className="space-y-space-md">
-                {selectedWs.milestones.map((milestone) => {
-                  const milestoneFiles = selectedWs.deliverables.filter(
-                    (d) => String(d.milestone_id) === String(milestone.id)
-                  );
-                  return (
+            {/* Tab: Overview */}
+            {activeTab === 'overview' && (
+              <div className="space-y-6">
+                {selectedWs.health && (
+                  <ProjectHealthCard
+                    health={selectedWs.health}
+                    isRecruiter={user?.role === 'brand'}
+                    onOpenRescueModal={(action) => {
+                      setRescueModalAction(action);
+                      setShowRescueModal(true);
+                    }}
+                    onContinueWithCreator={handleContinueWithCreator}
+                  />
+                )}
+
+                <ConfirmedBriefCard
+                  brief={selectedWs.brief}
+                  fallbackTitle={selectedWs.title}
+                  fallbackBudget={selectedWs.total_budget}
+                />
+
+                <AgreedUsageRights licensing={selectedWs.agreed_licensing} />
+
+                {/* Milestone Execution Plan */}
+                <div className="bg-surface-container-low rounded-2xl p-6 border border-surface-container-high/60">
+                  <div className="flex items-center justify-between pb-3 mb-4 border-b border-surface-container-high">
+                    <div>
+                      <h4 className="font-title-md text-title-md text-on-surface flex items-center gap-2">
+                        <span className="material-symbols-outlined text-primary">flag</span>
+                        Milestones & Payment Tranches
+                      </h4>
+                      <p className="font-body-sm text-body-sm text-on-surface-variant mt-0.5">
+                        Structured phases tied to deliverable review and escrow release
+                      </p>
+                    </div>
+                    <span className="font-title-sm text-primary font-bold">
+                      ₹{selectedWs.total_budget.toLocaleString('en-IN')} Total
+                    </span>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    {selectedWs.milestones.map((m) => (
+                      <div
+                        key={m.id}
+                        className="p-4 bg-surface-container rounded-xl border border-surface-container-high flex items-center justify-between gap-3"
+                      >
+                        <div>
+                          <span className="font-label-xs text-secondary font-semibold uppercase tracking-wider block">
+                            Milestone #{m.step_number} ({m.payout_percentage}%)
+                          </span>
+                          <p className="font-title-sm text-title-sm text-on-surface font-medium">{m.title}</p>
+                          <span className="font-label-xs text-on-surface-variant block mt-0.5">
+                            ₹{Number(m.amount).toLocaleString('en-IN')}
+                          </span>
+                        </div>
+                        <span
+                          className={`px-2.5 py-1 rounded-full text-label-xs font-semibold capitalize ${
+                            m.status === 'completed'
+                              ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
+                              : m.status === 'in_progress'
+                              ? 'bg-blue-500/10 text-blue-400 border border-blue-500/20'
+                              : 'bg-surface-container-high text-on-surface-variant'
+                          }`}
+                        >
+                          {m.status}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Production Timeline Preview */}
+                <ProductionTimeline
+                  items={selectedWs.timeline || []}
+                  workspaceId={selectedWs.id}
+                />
+              </div>
+            )}
+
+            {/* Tab: Deliverables (including legacy 'assets') */}
+            {(activeTab === 'deliverables' || (activeTab as string) === 'assets') && (
+              <div className="space-y-6">
+                {/* Milestone Action Cards */}
+                <div className="space-y-3">
+                  {selectedWs.milestones.map((milestone) => (
                     <div
                       key={milestone.id}
-                      className="bg-surface-container-lowest p-space-md rounded-xl border border-outline-variant/30 flex flex-col gap-space-sm shadow-sm"
+                      className="bg-surface-container-low p-4 rounded-xl border border-surface-container-high flex flex-col sm:flex-row sm:items-center justify-between gap-3"
                     >
-                      <div className="flex flex-col md:flex-row md:items-center justify-between gap-space-md">
-                        <div className="space-y-1">
-                          <div className="flex items-center gap-2">
-                            <span
-                              className={`w-2.5 h-2.5 rounded-full ${
-                                milestone.status === 'completed'
-                                  ? 'bg-secondary'
-                                  : milestone.status === 'in_progress'
-                                  ? 'bg-secondary-container animate-pulse'
-                                  : 'bg-outline'
-                              }`}
-                            />
-                            <span className="font-label-sm text-label-sm uppercase text-secondary font-semibold">
-                              Milestone #{milestone.step_number}
-                            </span>
-                            <span className="font-label-sm text-on-surface-variant bg-surface-container px-2 py-0.5 rounded-full">
-                              ₹{Number(milestone.amount).toLocaleString('en-IN')} ({milestone.payout_percentage}%)
-                            </span>
-                          </div>
-                          <h3 className="font-headline-sm text-[19px] text-on-surface">
-                            {milestone.title}
-                          </h3>
-                          <p className="font-body-sm text-body-sm text-on-surface-variant">
-                            {milestone.description}
-                          </p>
-                        </div>
-
-                        <div className="flex items-center gap-2 flex-shrink-0">
-                          {milestone.status === 'completed' ? (
-                            <span className="inline-flex items-center gap-1 text-secondary font-label-md bg-secondary-fixed/40 px-3 py-1 rounded-full">
-                              <span className="material-symbols-outlined text-[16px]">check</span>
-                              Approved & Escrow Released
-                            </span>
-                          ) : milestone.status === 'in_progress' ? (
-                            <>
-                              <button
-                                onClick={() => { setTargetMilestoneForRevision(milestone); setShowRevisionModal(true); }}
-                                className="px-3 py-1.5 rounded-full bg-surface-container hover:bg-surface-container-high text-on-surface font-label-sm cursor-pointer"
-                              >
-                                Request Revision
-                              </button>
-                              <button
-                                onClick={() => handleApproveMilestone(milestone.id)}
-                                className="px-4 py-1.5 rounded-full bg-primary text-on-primary font-label-sm hover:bg-primary-container hover:text-on-surface transition-all cursor-pointer shadow-sm"
-                              >
-                                Approve & Release Funds
-                              </button>
-                            </>
-                          ) : (
-                            <span className="text-on-surface-variant font-label-sm uppercase">Pending</span>
-                          )}
-                        </div>
-                      </div>
-
-                      {/* Submitted Deliverables for this Milestone */}
-                      {milestoneFiles.length > 0 && (
-                        <div className="mt-2 pt-2 border-t border-surface-container-high space-y-2">
-                          <span className="font-label-sm text-[11px] text-on-surface-variant uppercase font-semibold block">
-                            Milestone Deliverable Files ({milestoneFiles.length}):
-                          </span>
-                          <div className="grid grid-cols-1 gap-2">
-                            {milestoneFiles.map((file) => (
-                              <div
-                                key={file.id}
-                                className="flex items-center justify-between p-2.5 rounded-lg bg-surface-container-low border border-outline-variant/20 hover:border-secondary/40 transition-all"
-                              >
-                                <div className="flex items-center gap-2.5">
-                                  <span className="material-symbols-outlined text-[20px] text-secondary">
-                                    {file.type === 'image' ? 'image' : file.type === 'video' ? 'movie' : file.type === 'zip' ? 'folder_zip' : 'description'}
-                                  </span>
-                                  <div>
-                                    <div className="flex items-center gap-2">
-                                      <span className="font-label-md text-on-surface font-medium">{file.title}</span>
-                                      <span className="px-2 py-0.2 rounded-full bg-secondary-fixed/50 text-[10px] text-on-secondary-fixed font-semibold uppercase">
-                                        v{file.version}
-                                      </span>
-                                    </div>
-                                    <span className="font-body-sm text-[11px] text-on-surface-variant block">
-                                      {file.file_size} · Uploaded by {file.uploader_name} {file.created_at ? `(${file.created_at})` : ''}
-                                    </span>
-                                  </div>
-                                </div>
-
-                                <a
-                                  href={file.url}
-                                  download={file.title}
-                                  target="_blank"
-                                  rel="noreferrer"
-                                  className="px-3 py-1 rounded-full bg-surface-container-high text-on-surface font-label-sm hover:bg-secondary hover:text-on-secondary transition-all flex items-center gap-1 shadow-sm"
-                                >
-                                  <span className="material-symbols-outlined text-[16px]">download</span>
-                                  <span>Download</span>
-                                </a>
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  );
-                })}
-              </div>
-            )}
-
-            {/* Open Revision Requests — shown in Deliverables tab */}
-            {activeTab === 'deliverables' && selectedWs.revisions && selectedWs.revisions.length > 0 && (
-              <div className="space-y-2">
-                <h4 className="font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant font-semibold">Revision Requests</h4>
-                {selectedWs.revisions.map((rev) => {
-                  const linkedMilestone = selectedWs.milestones.find((m) => String(m.id) === String(rev.milestone_id));
-                  return (
-                    <div key={rev.id} className="bg-surface-container-low rounded-xl p-space-sm border border-outline-variant/30 flex flex-col gap-1">
-                      <div className="flex items-center justify-between gap-2">
+                      <div>
                         <div className="flex items-center gap-2">
-                          <span className="material-symbols-outlined text-[16px] text-error">edit_note</span>
-                          <span className="font-label-sm text-label-sm text-on-surface font-semibold">
-                            {linkedMilestone ? `Revision on: ${linkedMilestone.title}` : 'Workspace Revision'}
+                          <span
+                            className={`w-2.5 h-2.5 rounded-full ${
+                              milestone.status === 'completed'
+                                ? 'bg-emerald-400'
+                                : milestone.status === 'in_progress'
+                                ? 'bg-blue-400 animate-pulse'
+                                : 'bg-outline'
+                            }`}
+                          />
+                          <span className="font-label-xs uppercase text-secondary font-semibold">
+                            Milestone #{milestone.step_number} • ₹{Number(milestone.amount).toLocaleString('en-IN')}
                           </span>
                         </div>
-                        <span className={`font-label-sm px-2 py-0.5 rounded-full text-[11px] font-semibold ${
-                          rev.status === 'open' ? 'bg-error/10 text-error' :
-                          rev.status === 'addressed' ? 'bg-secondary-fixed/30 text-secondary' :
-                          'bg-surface-container-high text-on-surface-variant'
-                        }`}>{rev.status.toUpperCase()}</span>
+                        <h4 className="font-title-sm text-title-sm text-on-surface font-semibold mt-1">
+                          {milestone.title}
+                        </h4>
+                        <p className="font-body-sm text-body-sm text-on-surface-variant">
+                          {milestone.description}
+                        </p>
                       </div>
-                      <p className="font-body-sm text-body-sm text-on-surface leading-snug">{rev.description}</p>
-                      <span className="font-body-sm text-[10px] text-on-surface-variant">
-                        {rev.requester?.full_name || 'Requester'} · {rev.created_at}
-                      </span>
-                    </div>
-                  );
-                })}
-              </div>
-            )}
 
-            {/* Tab: Chat */}
-            {activeTab === 'chat' && (
-              <div className="bg-surface-container-lowest p-space-md rounded-xl border border-outline-variant/30 space-y-space-md shadow-sm">
-                <div className="space-y-space-sm max-h-96 overflow-y-auto pr-2">
-                  {selectedWs.messages.map((msg) => (
-                    <div
-                      key={msg.id}
-                      className={`p-space-sm rounded-lg max-w-xl ${
-                        msg.sender_role === 'system'
-                          ? 'bg-surface-container mx-auto text-center'
-                          : msg.sender_role === 'brand'
-                          ? 'bg-surface-container-high ml-auto'
-                          : 'bg-surface border border-outline-variant/30'
-                      }`}
-                    >
-                      <div className="flex items-center justify-between gap-2 mb-1">
-                        <span className="font-label-sm text-on-surface font-semibold">{msg.sender_name}</span>
-                        <span className="font-body-sm text-[10px] text-on-surface-variant">{msg.created_at}</span>
+                      <div className="flex items-center gap-2 flex-shrink-0">
+                        {milestone.status === 'completed' ? (
+                          <span className="inline-flex items-center gap-1 text-emerald-400 font-label-sm bg-emerald-500/10 border border-emerald-500/30 px-3 py-1 rounded-full">
+                            <span className="material-symbols-outlined text-[16px]">check_circle</span>
+                            Approved & Released
+                          </span>
+                        ) : milestone.status === 'in_progress' ? (
+                          <>
+                            {user?.role === 'brand' && (
+                              <>
+                                <button
+                                  onClick={() => {
+                                    setTargetMilestoneForRevision(milestone);
+                                    setShowRevisionModal(true);
+                                  }}
+                                  className="px-3 py-1.5 rounded-full bg-surface-container hover:bg-surface-container-high text-on-surface font-label-sm cursor-pointer"
+                                >
+                                  Request Revision
+                                </button>
+                                <button
+                                  onClick={() => handleApproveMilestone(milestone.id)}
+                                  className="px-4 py-1.5 rounded-full bg-primary text-on-primary font-label-sm hover:bg-primary-container hover:text-on-surface transition-all cursor-pointer shadow-sm"
+                                >
+                                  Approve & Release Funds
+                                </button>
+                              </>
+                            )}
+                            {user?.role === 'creator' && (
+                              <button
+                                onClick={() => {
+                                  setUploadMilestoneId(milestone.id);
+                                  setShowUploadModal(true);
+                                }}
+                                className="px-3 py-1.5 rounded-full bg-secondary text-on-secondary font-label-sm hover:bg-secondary/90 transition-all cursor-pointer"
+                              >
+                                Upload Deliverable
+                              </button>
+                            )}
+                          </>
+                        ) : (
+                          <span className="text-on-surface-variant font-label-sm uppercase px-2.5 py-1 rounded-full bg-surface-container">
+                            Pending
+                          </span>
+                        )}
                       </div>
-                      <p className="font-body-sm text-body-sm text-on-surface">{msg.content}</p>
                     </div>
                   ))}
                 </div>
 
+                {/* Deliverables Version History */}
+                <DeliverableVersionHistory
+                  deliverables={selectedWs.deliverables}
+                  milestones={selectedWs.milestones}
+                  workspaceId={selectedWs.id}
+                  isRecruiter={user?.role === 'brand'}
+                  onRefresh={() => handleSelectWorkspace(selectedWs)}
+                />
+
+                {/* Production Timeline */}
+                <ProductionTimeline
+                  items={selectedWs.timeline || []}
+                  workspaceId={selectedWs.id}
+                />
+              </div>
+            )}
+
+            {/* Tab: Revisions */}
+            {activeTab === 'revisions' && (
+              <RevisionFlowPanel
+                revisions={selectedWs.revisions || []}
+                milestones={selectedWs.milestones}
+                workspaceId={selectedWs.id}
+                isRecruiter={user?.role === 'brand'}
+                isCreator={user?.role === 'creator'}
+                onRequestRevisionClick={() => setShowRevisionModal(true)}
+                onRefresh={() => handleSelectWorkspace(selectedWs)}
+              />
+            )}
+
+            {/* Tab: Messages (including legacy 'chat') */}
+            {(activeTab === 'messages' || (activeTab as string) === 'chat') && (
+              <div className="bg-surface-container-lowest p-space-md rounded-xl border border-outline-variant/30 space-y-space-md shadow-sm">
+                {selectedWs.messages.length === 0 ? (
+                  <div className="py-12 text-center text-on-surface-variant text-body-sm space-y-2">
+                    <span className="material-symbols-outlined text-[36px] text-secondary/60 mx-auto block">
+                      forum
+                    </span>
+                    <p className="font-label-md text-on-surface font-medium">No messages yet in this workspace</p>
+                    <p className="text-xs max-w-sm mx-auto">
+                      Send a message below to coordinate deliverables, style feedback, or project specifications.
+                    </p>
+                  </div>
+                ) : (
+                  <div className="space-y-space-sm max-h-96 overflow-y-auto pr-2">
+                    {selectedWs.messages.map((msg) => (
+                      <div
+                        key={msg.id}
+                        className={`p-space-sm rounded-lg max-w-xl ${
+                          msg.sender_role === 'system'
+                            ? 'bg-surface-container mx-auto text-center'
+                            : msg.sender_role === 'brand'
+                            ? 'bg-surface-container-high ml-auto'
+                            : 'bg-surface border border-outline-variant/30'
+                        }`}
+                      >
+                        <div className="flex items-center justify-between gap-2 mb-1">
+                          <span className="font-label-sm text-on-surface font-semibold">{msg.sender_name}</span>
+                          <span className="font-body-sm text-[10px] text-on-surface-variant">{msg.created_at}</span>
+                        </div>
+                        <p className="font-body-sm text-body-sm text-on-surface whitespace-pre-line">{msg.content}</p>
+                      </div>
+                    ))}
+                    <div ref={messagesEndRef} />
+                  </div>
+                )}
+
                 <div className="flex gap-2 pt-2 border-t border-surface-container">
                   <input
                     type="text"
-                    placeholder="Write a message to the creator..."
+                    placeholder={
+                      user?.role === 'creator'
+                        ? 'Write a message to the recruiter...'
+                        : 'Write a message to the creator...'
+                    }
                     value={chatMessage}
+                    disabled={isSendingMessage}
                     onChange={(e) => setChatMessage(e.target.value)}
                     onKeyDown={(e) => e.key === 'Enter' && handleSendMessage()}
                     className="flex-1 bg-surface-container-low text-on-surface px-4 py-2 rounded-full border border-outline-variant/30 focus:outline-none focus:border-secondary"
                   />
                   <button
                     onClick={handleSendMessage}
-                    className="px-5 py-2 bg-primary text-on-primary font-label-md rounded-full hover:bg-primary-container transition-all cursor-pointer shadow-sm"
+                    disabled={isSendingMessage || !chatMessage.trim()}
+                    className="px-5 py-2 bg-primary text-on-primary font-label-md rounded-full hover:bg-primary-container disabled:opacity-50 transition-all cursor-pointer shadow-sm"
                   >
-                    Send
+                    {isSendingMessage ? 'Sending...' : 'Send'}
                   </button>
                 </div>
               </div>
             )}
 
-            {/* Tab: Assets */}
-            {activeTab === 'assets' && (
-              <div className="bg-surface-container-lowest p-space-md rounded-xl border border-outline-variant/30 space-y-space-sm shadow-sm">
-                <div className="flex items-center justify-between">
-                  <h3 className="font-headline-sm text-headline-sm text-on-surface">Verified Deliverables & Files</h3>
-                  {user?.role === 'creator' && selectedWs.status !== 'completed' && (
-                    <button
-                      onClick={() => setShowUploadModal(true)}
-                      className="px-3 py-1.5 rounded-full bg-secondary text-on-secondary font-label-sm hover:bg-secondary/90 transition-all flex items-center gap-1 shadow-sm cursor-pointer"
-                    >
-                      <span className="material-symbols-outlined text-[16px]">upload_file</span>
-                      <span>Upload File</span>
-                    </button>
-                  )}
-                </div>
-
-                {selectedWs.deliverables.length === 0 ? (
-                  <p className="font-body-sm text-body-sm text-on-surface-variant py-4 text-center">
-                    No deliverables have been submitted in this workspace yet.
-                  </p>
-                ) : (
-                  <div className="space-y-2">
-                    {selectedWs.deliverables.map((del) => (
-                      <div
-                        key={del.id}
-                        className="flex items-center justify-between p-3 rounded-lg bg-surface-container-low border border-outline-variant/20 hover:border-secondary/40 transition-all"
-                      >
-                        <div className="flex items-center gap-3">
-                          <span className="material-symbols-outlined text-[24px] text-secondary">
-                            {del.type === 'image' ? 'image' : del.type === 'video' ? 'movie' : del.type === 'zip' ? 'folder_zip' : 'description'}
-                          </span>
-                          <div>
-                            <div className="flex items-center gap-2">
-                              <span className="font-label-md text-on-surface block font-medium">{del.title}</span>
-                              <span className="px-2 py-0.2 rounded-full bg-secondary-fixed/50 text-[10px] text-on-secondary-fixed font-semibold uppercase">
-                                v{del.version}
-                              </span>
-                              {del.status === 'demo' && (
-                                <span className="px-2 py-0.2 rounded-full bg-surface-container-high text-[10px] text-on-surface-variant font-semibold uppercase">
-                                  Demo Asset
-                                </span>
-                              )}
-                            </div>
-                            <span className="font-body-sm text-[12px] text-on-surface-variant">
-                              {del.file_size} · Uploaded by {del.uploader_name} {del.created_at ? `(${del.created_at})` : ''}
-                            </span>
-                          </div>
-                        </div>
-
-                        {del.status !== 'demo' ? (
-                          <a
-                            href={del.url}
-                            download={del.title}
-                            target="_blank"
-                            rel="noreferrer"
-                            className="px-3 py-1 rounded-full bg-surface-container-high text-on-surface font-label-sm hover:bg-secondary hover:text-on-secondary transition-all flex items-center gap-1 shadow-sm"
-                          >
-                            <span className="material-symbols-outlined text-[16px]">download</span>
-                            <span>Download</span>
-                          </a>
-                        ) : (
-                          <span className="font-label-sm text-xs text-on-surface-variant bg-surface-container px-2.5 py-1 rounded-full">
-                            Placeholder Preview
-                          </span>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-            )}
-
-            {/* Tab: Legal */}
-            {activeTab === 'legal' && (
-              <div className="bg-surface-container-lowest p-space-md rounded-xl border border-outline-variant/30 space-y-space-sm shadow-sm">
-                <h3 className="font-headline-sm text-headline-sm text-on-surface">Usage Rights</h3>
-                <p className="font-body-md text-body-md text-on-surface-variant leading-relaxed">
-                  After the final escrow payment is released, commercial usage rights transfer to {selectedWs.brand_name}. Project files remain stored securely in the CODE XERO archive.
-                </p>
-              </div>
+            {/* Tab: Usage Rights (including legacy 'legal') */}
+            {(activeTab === 'usage_rights' || (activeTab as string) === 'legal') && (
+              <AgreedUsageRights licensing={selectedWs.agreed_licensing} />
             )}
           </main>
         </div>
@@ -799,14 +950,19 @@ export const WorkspacesPage: React.FC = () => {
             />
             <div className="flex justify-end gap-2">
               <button
-                onClick={() => { setShowRevisionModal(false); setRevisionNotes(''); setTargetMilestoneForRevision(null); }}
-                className="px-4 py-2 rounded-full bg-surface-container text-on-surface font-label-md"
+                onClick={() => {
+                  setShowRevisionModal(false);
+                  setRevisionNotes('');
+                  setTargetMilestoneForRevision(null);
+                }}
+                className="px-4 py-2 rounded-full bg-surface-container text-on-surface font-label-md cursor-pointer"
               >
                 Cancel
               </button>
               <button
                 onClick={handleRequestRevision}
-                className="px-5 py-2 rounded-full bg-primary text-on-primary font-label-md hover:bg-primary-container"
+                disabled={!revisionNotes.trim()}
+                className="px-5 py-2 rounded-full bg-primary text-on-primary font-label-md hover:bg-primary-container disabled:opacity-50 cursor-pointer shadow-sm"
               >
                 Submit Request
               </button>
@@ -822,8 +978,12 @@ export const WorkspacesPage: React.FC = () => {
             <div className="flex items-center justify-between">
               <h3 className="font-headline-sm text-headline-sm text-on-surface">Upload Project Deliverable</h3>
               <button
-                onClick={() => { setShowUploadModal(false); setUploadError(null); setUploadFile(null); }}
-                className="text-on-surface-variant hover:text-on-surface"
+                onClick={() => {
+                  setShowUploadModal(false);
+                  setUploadError(null);
+                  setUploadFile(null);
+                }}
+                className="text-on-surface-variant hover:text-on-surface cursor-pointer"
               >
                 <span className="material-symbols-outlined text-[20px]">close</span>
               </button>
@@ -891,8 +1051,12 @@ export const WorkspacesPage: React.FC = () => {
               <div className="flex justify-end gap-2 pt-2">
                 <button
                   type="button"
-                  onClick={() => { setShowUploadModal(false); setUploadError(null); setUploadFile(null); }}
-                  className="px-4 py-2 rounded-full bg-surface-container text-on-surface font-label-md"
+                  onClick={() => {
+                    setShowUploadModal(false);
+                    setUploadError(null);
+                    setUploadFile(null);
+                  }}
+                  className="px-4 py-2 rounded-full bg-surface-container text-on-surface font-label-md cursor-pointer"
                 >
                   Cancel
                 </button>
@@ -901,7 +1065,7 @@ export const WorkspacesPage: React.FC = () => {
                   disabled={isUploading || !uploadFile}
                   className="px-5 py-2 rounded-full bg-primary text-on-primary font-label-md hover:bg-primary-container disabled:opacity-50 cursor-pointer shadow-sm"
                 >
-                  {isUploading ? 'Uploading...' : 'Upload Asset'}
+                  {isUploading ? 'Uploading...' : 'Upload Deliverable'}
                 </button>
               </div>
             </form>
@@ -916,8 +1080,11 @@ export const WorkspacesPage: React.FC = () => {
             <div className="flex items-center justify-between">
               <h3 className="font-headline-sm text-headline-sm text-on-surface">Leave Verified Creator Review</h3>
               <button
-                onClick={() => { setShowReviewModal(false); setReviewError(null); }}
-                className="text-on-surface-variant hover:text-on-surface"
+                onClick={() => {
+                  setShowReviewModal(false);
+                  setReviewError(null);
+                }}
+                className="text-on-surface-variant hover:text-on-surface cursor-pointer"
               >
                 <span className="material-symbols-outlined text-[20px]">close</span>
               </button>
@@ -974,8 +1141,11 @@ export const WorkspacesPage: React.FC = () => {
               <div className="flex justify-end gap-2 pt-2">
                 <button
                   type="button"
-                  onClick={() => { setShowReviewModal(false); setReviewError(null); }}
-                  className="px-4 py-2 rounded-full bg-surface-container text-on-surface font-label-md"
+                  onClick={() => {
+                    setShowReviewModal(false);
+                    setReviewError(null);
+                  }}
+                  className="px-4 py-2 rounded-full bg-surface-container text-on-surface font-label-md cursor-pointer"
                 >
                   Cancel
                 </button>
@@ -990,6 +1160,21 @@ export const WorkspacesPage: React.FC = () => {
             </form>
           </div>
         </div>
+      )}
+
+      {/* Project Rescue & Recovery Modal */}
+      {selectedWs && selectedWs.health && showRescueModal && (
+        <ProjectRescueModal
+          workspaceId={selectedWs.id}
+          initialTab={rescueModalAction}
+          health={selectedWs.health}
+          isOpen={showRescueModal}
+          onClose={() => setShowRescueModal(false)}
+          onActionComplete={async () => {
+            const updated = await api.workspaces.getById(selectedWs.id);
+            setSelectedWs(updated);
+          }}
+        />
       )}
     </div>
   );

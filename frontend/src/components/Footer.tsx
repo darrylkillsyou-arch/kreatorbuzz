@@ -80,7 +80,7 @@ export const Footer: React.FC = () => {
 
         <div className="pt-space-lg flex flex-col sm:flex-row items-center justify-between gap-space-sm border-t border-surface-container-highest/60">
           <p className="font-body-sm text-body-sm text-on-surface-variant">
-            © 2025 CODE XERO. Built for AI creators and clients.
+            © 2026 KreatorBuzz. Create Your Own Buzz.
           </p>
           <div className="flex items-center gap-space-md">
             <a className="font-body-sm text-body-sm text-on-surface-variant hover:text-on-surface transition-colors" href="#terms">

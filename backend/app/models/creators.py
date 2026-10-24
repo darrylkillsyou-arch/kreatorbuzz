@@ -35,6 +35,7 @@ class CreatorProfile(Base):
     achievements = relationship("CreatorAchievement", back_populates="creator", cascade="all, delete-orphan")
     verifications = relationship("Verification", back_populates="creator", cascade="all, delete-orphan")
     leaderboard_entries = relationship("LeaderboardEntry", back_populates="creator", cascade="all, delete-orphan")
+    licensing = relationship("CreatorLicensing", back_populates="creator_profile", uselist=False, cascade="all, delete-orphan")
 
 
 class PortfolioItem(Base):

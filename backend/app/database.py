@@ -1,5 +1,6 @@
 """Database connection and session configuration supporting SQLite and Supabase / PostgreSQL."""
 
+import os
 from sqlalchemy import create_engine
 from sqlalchemy.orm import declarative_base, sessionmaker
 from app.config import settings
@@ -11,6 +12,10 @@ if raw_db_url.startswith("postgres://"):
     db_url = raw_db_url.replace("postgres://", "postgresql://", 1)
 else:
     db_url = raw_db_url
+
+# Serverless runtime safety (e.g., Vercel Lambda where root filesystem is read-only)
+if db_url.startswith("sqlite") and os.environ.get("VERCEL") and "/tmp" not in db_url:
+    db_url = "sqlite:////tmp/maccall.db"
 
 engine_kwargs = {
     "echo": False,

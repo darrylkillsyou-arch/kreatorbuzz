@@ -9,6 +9,8 @@ from app.routes.search import router as search_router
 from app.routes.proposals import router as proposals_router
 from app.routes.notifications import router as notifications_router
 from app.routes.xero import router as xero_router
+from app.routes.licensing import router as licensing_router
+from app.routes.comparison import router as comparison_router
 
 __all__ = [
     "auth_router",
@@ -22,5 +24,7 @@ __all__ = [
     "proposals_router",
     "notifications_router",
     "xero_router",
+    "licensing_router",
+    "comparison_router",
 ]
 

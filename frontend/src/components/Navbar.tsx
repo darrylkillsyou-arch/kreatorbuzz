@@ -84,9 +84,9 @@ export const Navbar: React.FC = () => {
               <NavLink to="/workspaces" className={navItemClass}>
                 Workspaces
               </NavLink>
-              {user?.role === 'creator' && (
+              {user && (
                 <NavLink to="/requests" className={navItemClass}>
-                  Project Requests
+                  {user.role === 'brand' ? 'Proposals' : 'Project Requests'}
                 </NavLink>
               )}
               <NavLink to="/leaderboard" className={navItemClass}>
@@ -176,10 +176,12 @@ export const Navbar: React.FC = () => {
                           <div className="flex items-start gap-2.5">
                             <span
                               className={`material-symbols-outlined text-[18px] mt-0.5 ${
-                                n.type === 'proposal_accepted'
+                                n.type === 'proposal_accepted' || n.type === 'workspace_created'
                                   ? 'text-secondary'
                                   : n.type === 'proposal_declined'
                                   ? 'text-error'
+                                  : n.type === 'revision_requested'
+                                  ? 'text-amber-500'
                                   : 'text-primary'
                               }`}
                             >
@@ -187,6 +189,14 @@ export const Navbar: React.FC = () => {
                                 ? 'check_circle'
                                 : n.type === 'proposal_declined'
                                 ? 'cancel'
+                                : n.type === 'workspace_created'
+                                ? 'workspaces'
+                                : n.type === 'revision_requested'
+                                ? 'edit_note'
+                                : n.type === 'deliverable_uploaded'
+                                ? 'upload_file'
+                                : n.type === 'proposal_sent'
+                                ? 'send'
                                 : 'mail'}
                             </span>
                             <div className="flex-1 min-w-0">

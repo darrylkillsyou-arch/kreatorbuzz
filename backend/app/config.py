@@ -5,7 +5,7 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class Settings(BaseSettings):
-    PROJECT_NAME: str = "Maccall AI Creator Marketplace"
+    PROJECT_NAME: str = "KreatorBuzz — Create Your Own Buzz"
     VERSION: str = "1.0.0"
     API_V1_STR: str = "/api"
     

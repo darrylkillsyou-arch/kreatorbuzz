@@ -127,7 +127,7 @@ export const SavedCreatorsPage: React.FC = () => {
                 onClick={() => navigate('/login')}
                 className="inline-flex items-center gap-2 px-space-lg py-2.5 bg-primary text-on-primary font-label-lg rounded-full hover:bg-primary-container hover:text-on-surface transition-all shadow-sm cursor-pointer"
               >
-                Sign in to CODE XERO
+                Sign in to KreatorBuzz
               </button>
             </div>
           ) : savedCreators.length === 0 ? (

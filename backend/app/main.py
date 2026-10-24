@@ -23,6 +23,8 @@ from app.routes import (
     proposals_router,
     notifications_router,
     xero_router,
+    licensing_router,
+    comparison_router,
 )
 
 
@@ -63,7 +65,7 @@ async def lifespan(app: FastAPI):
 app = FastAPI(
     title=settings.PROJECT_NAME,
     version=settings.VERSION,
-    description="Maccall AI Creator Marketplace Backend API",
+    description="KreatorBuzz AI Creator Marketplace Backend API — Create Your Own Buzz",
     lifespan=lifespan,
     docs_url="/docs",
     redoc_url="/redoc",
@@ -94,6 +96,8 @@ app.include_router(search_router, prefix=settings.API_V1_STR)
 app.include_router(proposals_router, prefix=settings.API_V1_STR)
 app.include_router(notifications_router, prefix=settings.API_V1_STR)
 app.include_router(xero_router, prefix=settings.API_V1_STR)
+app.include_router(licensing_router, prefix=settings.API_V1_STR)
+app.include_router(comparison_router, prefix=settings.API_V1_STR)
 
 
 

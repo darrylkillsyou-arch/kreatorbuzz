@@ -32,6 +32,7 @@ class Brief(Base):
     brand_user = relationship("User", back_populates="briefs")
     workspaces = relationship("Workspace", back_populates="brief")
     shortlists = relationship("Shortlist", back_populates="brief", cascade="all, delete-orphan")
+    licensing = relationship("BriefLicensing", back_populates="brief", uselist=False, cascade="all, delete-orphan")
 
 
 class XeroSession(Base):

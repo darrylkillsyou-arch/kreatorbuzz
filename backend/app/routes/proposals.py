@@ -162,15 +162,22 @@ def create_proposal(
     db.commit()
     db.refresh(proposal)
 
-    # 7. Notify the exact resolved creator user
-    notif = Notification(
+    # 7. Notify both the recipient creator and the sending recruiter
+    notif_creator = Notification(
         user_id=creator_user.id,
         title="New Project Proposal",
         message=f"{current_user.full_name or 'A recruiter'} sent you a proposal for '{proposal.project_title}' (Budget: ₹{proposal.budget_in_rupees:,.0f}).",
         link="/requests",
         type="proposal_received",
     )
-    db.add(notif)
+    notif_recruiter = Notification(
+        user_id=current_user.id,
+        title="Proposal Sent Successfully",
+        message=f"Your proposal for '{proposal.project_title}' was successfully sent to {creator_user.full_name or 'the creator'}.",
+        link="/requests",
+        type="proposal_sent",
+    )
+    db.add_all([notif_creator, notif_recruiter])
     db.commit()
 
     return _serialize_proposal(proposal, db)
@@ -264,15 +271,29 @@ def accept_proposal(
         )
         db.add(welcome_msg)
 
-    # Create notification for recruiter
-    notif = Notification(
+    # Create notifications for both recruiter and creator
+    notif_recruiter_accept = Notification(
         user_id=proposal.brand_user_id,
-        title="Proposal Accepted",
-        message=f"{current_user.full_name} accepted your proposal for '{proposal.project_title}'. Your workspace is ready!",
+        title="Creator Accepted Proposal",
+        message=f"{current_user.full_name} accepted your proposal for '{proposal.project_title}'.",
         link=f"/workspaces?id={workspace.id}",
         type="proposal_accepted",
     )
-    db.add(notif)
+    notif_recruiter_ws = Notification(
+        user_id=proposal.brand_user_id,
+        title="Workspace Created",
+        message=f"Collaboration workspace #{workspace.id} is now ready for '{proposal.project_title}'.",
+        link=f"/workspaces?id={workspace.id}",
+        type="workspace_created",
+    )
+    notif_creator_ws = Notification(
+        user_id=current_user.id,
+        title="Proposal Accepted & Workspace Ready",
+        message=f"You accepted '{proposal.project_title}'. Collaboration workspace #{workspace.id} is active.",
+        link=f"/workspaces?id={workspace.id}",
+        type="workspace_created",
+    )
+    db.add_all([notif_recruiter_accept, notif_recruiter_ws, notif_creator_ws])
     db.commit()
     db.refresh(proposal)
 
@@ -298,15 +319,22 @@ def decline_proposal(
 
     proposal.status = "declined"
 
-    # Create notification for recruiter
-    notif = Notification(
+    # Create notifications for recruiter and creator
+    notif_recruiter = Notification(
         user_id=proposal.brand_user_id,
-        title="Proposal Declined",
+        title="Creator Declined Proposal",
         message=f"{current_user.full_name} declined your proposal for '{proposal.project_title}'.",
-        link="/discover",
+        link="/requests",
         type="proposal_declined",
     )
-    db.add(notif)
+    notif_creator = Notification(
+        user_id=current_user.id,
+        title="Proposal Declined",
+        message=f"You declined the proposal for '{proposal.project_title}'.",
+        link="/requests",
+        type="proposal_declined",
+    )
+    db.add_all([notif_recruiter, notif_creator])
     db.commit()
     db.refresh(proposal)
 

@@ -2,9 +2,19 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { api } from '../lib/api';
 import { useAuth } from '../contexts/AuthContext';
-import type { Creator, RecommendedCreator, XeroProjectPlan, XeroChatMessage } from '../types';
+import type {
+  Creator,
+  RecommendedCreator,
+  XeroProjectPlan,
+  XeroChatMessage,
+  CreatorComparisonResult,
+  BlindArenaData,
+  CreatorCompareCardData,
+} from '../types';
 import { ProposalModal } from '../components/ProposalModal';
 import { CreatorAvatar } from '../components/CreatorAvatar';
+import { CreatorComparisonModal } from '../components/CreatorComparisonModal';
+import { BlindArenaModal } from '../components/BlindArenaModal';
 
 function formatINR(amount: number): string {
   return new Intl.NumberFormat('en-IN', {
@@ -42,6 +52,93 @@ export const BriefsPage: React.FC = () => {
   const [isSavingBrief, setIsSavingBrief] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
   const [savedBriefId, setSavedBriefId] = useState<string | number | null>(null);
+
+  // Phase 3: Creator Comparison & Blind Arena State
+  const [selectedCreatorIds, setSelectedCreatorIds] = useState<number[]>([]);
+  const [comparisonData, setComparisonData] = useState<CreatorComparisonResult | null>(null);
+  const [isComparing, setIsComparing] = useState(false);
+  const [blindArenaData, setBlindArenaData] = useState<BlindArenaData | null>(null);
+  const [isLoadingBlindArena, setIsLoadingBlindArena] = useState(false);
+
+  const toggleSelectCreator = (id: number) => {
+    setSelectedCreatorIds((prev) => {
+      if (prev.includes(id)) {
+        return prev.filter((cid) => cid !== id);
+      }
+      if (prev.length >= 3) {
+        return [...prev.slice(1), id];
+      }
+      return [...prev, id];
+    });
+  };
+
+  const handleOpenComparison = async () => {
+    if (selectedCreatorIds.length < 2) return;
+    setIsComparing(true);
+    try {
+      const res = await api.comparison.compare({
+        creator_ids: selectedCreatorIds,
+        target_category: plan?.core_category,
+        budget: plan?.budget,
+        timeline_days: plan?.timeline_days,
+      });
+      setComparisonData(res);
+    } catch (err) {
+      console.error('Failed to compare creators', err);
+    } finally {
+      setIsComparing(false);
+    }
+  };
+
+  const handleOpenBlindArena = async () => {
+    const idsToUse =
+      selectedCreatorIds.length >= 2
+        ? selectedCreatorIds
+        : recommendedCreators
+            .map((item) => Number(item.creator.id))
+            .filter(Boolean)
+            .slice(0, 3);
+
+    if (idsToUse.length < 2) return;
+    setIsLoadingBlindArena(true);
+    try {
+      const res = await api.comparison.createBlindArena({
+        creator_ids: idsToUse,
+        target_category: plan?.core_category,
+        budget: plan?.budget,
+        timeline_days: plan?.timeline_days,
+      });
+      setBlindArenaData(res);
+    } catch (err) {
+      console.error('Failed to open Blind Arena', err);
+    } finally {
+      setIsLoadingBlindArena(false);
+    }
+  };
+
+  const handleHireFromModal = (card: CreatorCompareCardData) => {
+    const mapped: Creator = {
+      id: String(card.creator_id),
+      profile_id: String(card.creator_id),
+      user_id: String(card.user_id),
+      name: card.display_name,
+      avatar: card.avatar_url || '',
+      specialization: card.specialization,
+      location: 'Mumbai, IN',
+      tier: 'Tier 1 Director',
+      is_verified: true,
+      rating: card.rating,
+      rate_per_day: card.starting_rate,
+      sla_index: card.sla_score,
+      commissions_count: card.reliability.completed_projects,
+      on_time_rate: card.reliability.on_time_percentage,
+      tools_and_pipeline: card.ai_tools,
+      hero_image: card.portfolio_samples[0]?.image_url || '',
+    };
+    setProposalTarget(mapped);
+    setComparisonData(null);
+    setBlindArenaData(null);
+  };
 
   // Initial load: restore existing session if available
   useEffect(() => {
@@ -267,9 +364,9 @@ export const BriefsPage: React.FC = () => {
                 {messages.length === 0 ? (
                   <div className="h-full flex flex-col items-center justify-center text-center p-space-lg text-on-surface-variant space-y-2">
                     <span className="material-symbols-outlined text-[36px] text-secondary/60">smart_toy</span>
-                    <h3 className="font-headline-sm text-headline-sm text-on-surface">Tell Xero about your creative vision</h3>
+                    <h3 className="font-headline-sm text-headline-sm text-on-surface">Tell KreatorBuzz about your creative vision</h3>
                     <p className="font-body-sm text-body-sm max-w-sm">
-                      Describe your brand, style, budget, and desired outputs. Xero asks follow-up questions only when needed and creates a complete project blueprint.
+                      Describe your brand, style, budget, and desired outputs. KreatorBuzz Copilot asks follow-up questions only when needed and creates a complete project blueprint.
                     </p>
                     <div className="pt-2 flex flex-wrap gap-1.5 justify-center max-w-md">
                       {[
@@ -388,7 +485,7 @@ export const BriefsPage: React.FC = () => {
                   }}
                   placeholder={
                     plan
-                      ? 'Ask Xero to refine: "Make it cheaper", "Add 2 reels", "Change timeline to 5 days"...'
+                      ? 'Ask Copilot to refine: "Make it cheaper", "Add 2 reels", "Change timeline to 5 days"...'
                       : 'Describe your campaign: luxury perfume ad, sneaker 3D CGI, skincare reels...'
                   }
                   disabled={isSending}
@@ -572,22 +669,66 @@ export const BriefsPage: React.FC = () => {
 
               {/* Matched Creators Section */}
               <div className="bg-surface-container-lowest rounded-2xl p-space-lg shadow-sm border border-outline-variant/30 flex flex-col gap-space-md">
-                <div className="flex items-center justify-between pb-space-xs border-b border-surface-container">
+                <div className="flex flex-wrap items-center justify-between gap-3 pb-space-xs border-b border-surface-container">
                   <div className="flex items-center gap-2">
                     <span className="material-symbols-outlined text-secondary text-[20px]">verified</span>
                     <h3 className="font-headline-sm text-headline-sm text-on-surface font-semibold">
                       Matched AI Creators ({totalMatches} candidates ranked)
                     </h3>
                   </div>
-                  <button
-                    type="button"
-                    onClick={() => handleSendMessage('Show different creators')}
-                    className="text-xs text-secondary hover:underline flex items-center gap-1 font-semibold cursor-pointer"
-                  >
-                    <span className="material-symbols-outlined text-[14px]">sync</span>
-                    <span>Show Next 3 Creators</span>
-                  </button>
+
+                  <div className="flex items-center gap-2">
+                    {/* Enter Blind Arena Action */}
+                    <button
+                      type="button"
+                      disabled={isLoadingBlindArena || recommendedCreators.length < 2}
+                      onClick={handleOpenBlindArena}
+                      className="px-3.5 py-1.5 rounded-full text-xs font-bold bg-secondary-container/30 hover:bg-secondary-container/50 text-secondary border border-secondary/40 flex items-center gap-1.5 cursor-pointer shadow-sm transition-all"
+                      title="Anonymize profiles to evaluate purely on craft and portfolio evidence"
+                    >
+                      <span className="material-symbols-outlined text-[16px]">visibility_off</span>
+                      <span>{isLoadingBlindArena ? 'Opening Arena...' : 'Enter Blind Arena'}</span>
+                    </button>
+
+                    {/* Compare Button */}
+                    {selectedCreatorIds.length >= 2 && (
+                      <button
+                        type="button"
+                        disabled={isComparing}
+                        onClick={handleOpenComparison}
+                        className="px-3.5 py-1.5 rounded-full text-xs font-bold bg-primary hover:bg-primary-container text-on-primary flex items-center gap-1.5 cursor-pointer shadow-sm transition-all"
+                      >
+                        <span className="material-symbols-outlined text-[16px]">compare_arrows</span>
+                        <span>{isComparing ? 'Comparing...' : `Compare (${selectedCreatorIds.length})`}</span>
+                      </button>
+                    )}
+
+                    <button
+                      type="button"
+                      onClick={() => handleSendMessage('Show different creators')}
+                      className="text-xs text-secondary hover:underline flex items-center gap-1 font-semibold cursor-pointer ml-1"
+                    >
+                      <span className="material-symbols-outlined text-[14px]">sync</span>
+                      <span>Next 3</span>
+                    </button>
+                  </div>
                 </div>
+
+                {/* Subtitle / Selection helper note */}
+                {recommendedCreators.length > 0 && (
+                  <div className="flex items-center justify-between text-[11px] text-on-surface-variant px-1">
+                    <span>Select 2 or 3 creators to compare side-by-side with difference insights.</span>
+                    {selectedCreatorIds.length > 0 && (
+                      <button
+                        type="button"
+                        onClick={() => setSelectedCreatorIds([])}
+                        className="text-secondary hover:underline cursor-pointer"
+                      >
+                        Clear selection ({selectedCreatorIds.length})
+                      </button>
+                    )}
+                  </div>
+                )}
 
                 {recommendedCreators.length === 0 ? (
                   <p className="text-xs text-on-surface-variant py-4 text-center">
@@ -597,10 +738,17 @@ export const BriefsPage: React.FC = () => {
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                     {recommendedCreators.map((item, idx) => {
                       const c = item.creator;
+                      const cid = Number(c.id);
+                      const isSelected = selectedCreatorIds.includes(cid);
+
                       return (
                         <div
                           key={c.id || idx}
-                          className="p-3.5 rounded-xl bg-surface-container-low border border-outline-variant/30 flex flex-col justify-between gap-3 hover:border-secondary/40 transition-all shadow-sm"
+                          className={`p-3.5 rounded-xl border flex flex-col justify-between gap-3 transition-all shadow-sm ${
+                            isSelected
+                              ? 'bg-surface-container-low border-secondary/60 ring-1 ring-secondary/40'
+                              : 'bg-surface-container-low border-outline-variant/30 hover:border-secondary/40'
+                          }`}
                         >
                           <div className="space-y-2">
                             <div className="flex items-start justify-between gap-2">
@@ -619,9 +767,25 @@ export const BriefsPage: React.FC = () => {
                                   </p>
                                 </div>
                               </div>
-                              <span className="text-[11px] bg-secondary-container/40 text-secondary font-bold px-2 py-0.5 rounded-full shrink-0">
-                                {item.match_score}%
-                              </span>
+                              <div className="flex items-center gap-1.5 shrink-0">
+                                <span className="text-[11px] bg-secondary-container/40 text-secondary font-bold px-2 py-0.5 rounded-full">
+                                  {item.match_score}%
+                                </span>
+                                <button
+                                  type="button"
+                                  onClick={() => toggleSelectCreator(cid)}
+                                  className={`w-6 h-6 rounded-md flex items-center justify-center transition-colors cursor-pointer ${
+                                    isSelected
+                                      ? 'bg-secondary text-on-secondary'
+                                      : 'bg-surface-container hover:bg-surface-container-high text-on-surface-variant'
+                                  }`}
+                                  title={isSelected ? 'Deselect from comparison' : 'Select to compare (max 3)'}
+                                >
+                                  <span className="material-symbols-outlined text-[15px]">
+                                    {isSelected ? 'check' : 'add'}
+                                  </span>
+                                </button>
+                              </div>
                             </div>
 
                             {/* Rate in ₹ */}
@@ -670,6 +834,29 @@ export const BriefsPage: React.FC = () => {
           <ProposalModal
             creator={proposalTarget}
             onClose={() => setProposalTarget(null)}
+          />
+        )}
+
+        {/* Creator Comparison Modal */}
+        {comparisonData && (
+          <CreatorComparisonModal
+            candidates={comparisonData.candidates}
+            differences={comparisonData.difference_explanations}
+            summaryVerdict={comparisonData.summary_verdict}
+            briefId={savedBriefId ? Number(savedBriefId) : undefined}
+            onClose={() => setComparisonData(null)}
+            onHire={handleHireFromModal}
+          />
+        )}
+
+        {/* Blind Arena Modal */}
+        {blindArenaData && (
+          <BlindArenaModal
+            candidates={blindArenaData.candidates}
+            tagline={blindArenaData.tagline}
+            briefId={savedBriefId ? Number(savedBriefId) : undefined}
+            onClose={() => setBlindArenaData(null)}
+            onHire={handleHireFromModal}
           />
         )}
       </div>

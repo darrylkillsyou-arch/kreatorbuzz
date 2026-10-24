@@ -33,9 +33,17 @@ backend/**/__pycache__/
 .mypy_cache/
 .ruff_cache/
 
-# --- Database (exclude real production data, keep maccall.db for seeding) ---
+# --- Database (exclude local SQLite databases from Git) ---
 *.sqlite3
-# Keep: backend/maccall.db (seed data only, no real user PII)
+*.db
+backend/maccall.db
+
+# --- Uploads & Deliverables ---
+backend/uploads/
+uploads/
+
+# --- Vercel ---
+.vercel/
 
 # --- Secrets & Credentials ---
 .env

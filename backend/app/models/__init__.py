@@ -14,6 +14,7 @@ from app.models.shortlist import Shortlist
 from app.models.leaderboard import LeaderboardEntry
 from app.models.proposals import Proposal
 from app.models.notifications import Notification
+from app.models.licensing import CreatorLicensing, BriefLicensing
 
 __all__ = [
     "User",
@@ -37,4 +38,6 @@ __all__ = [
     "LeaderboardEntry",
     "Proposal",
     "Notification",
+    "CreatorLicensing",
+    "BriefLicensing",
 ]

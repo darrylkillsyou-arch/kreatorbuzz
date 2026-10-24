@@ -1,5 +1,5 @@
 from datetime import datetime
-from sqlalchemy import Column, Integer, String, Float, DateTime, Text, ForeignKey
+from sqlalchemy import Column, Integer, String, Float, DateTime, Text, ForeignKey, JSON
 from sqlalchemy.orm import relationship
 from app.database import Base
 
@@ -27,6 +27,7 @@ class Workspace(Base):
     files = relationship("SharedFile", back_populates="workspace", cascade="all, delete-orphan")
     revisions = relationship("RevisionRequest", back_populates="workspace", cascade="all, delete-orphan")
     review = relationship("Review", back_populates="workspace", uselist=False, cascade="all, delete-orphan")
+    rescue_logs = relationship("ProjectRescueLog", back_populates="workspace", cascade="all, delete-orphan")
 
 
 class WorkspaceMember(Base):
@@ -85,12 +86,21 @@ class SharedFile(Base):
     file_type = Column(String(50), nullable=True)  # video, image, model, zip, document
     version = Column(Integer, default=1, nullable=False)
     status = Column(String(50), default="submitted", nullable=False)  # submitted, approved, revision_requested, demo
-    description = Column(Text, nullable=True)
+    description = Column(Text, nullable=True)  # Creator note upon submission
+    client_feedback = Column(Text, nullable=True)  # Recruiter feedback on this version
+    # Buzz Check metadata — nullable, extracted after upload, never blocks the upload
+    width = Column(Integer, nullable=True)           # pixels (images / video frames)
+    height = Column(Integer, nullable=True)          # pixels
+    duration_seconds = Column(Float, nullable=True)  # audio / video duration
+    deliverable_type = Column(String(100), nullable=True)  # e.g. "hero_video", "thumbnail"
     created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
 
     workspace = relationship("Workspace", back_populates="files")
     milestone = relationship("WorkspaceMilestone", back_populates="deliverables")
     uploader = relationship("User")
+    buzz_check_results = relationship(
+        "DeliveryCheckResult", back_populates="file", cascade="all, delete-orphan"
+    )
 
 
 class Review(Base):
@@ -117,9 +127,54 @@ class RevisionRequest(Base):
     workspace_id = Column(Integer, ForeignKey("workspaces.id", ondelete="CASCADE"), nullable=False)
     requester_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
     description = Column(Text, nullable=False)
-    status = Column(String(50), default="open", nullable=False)  # open, addressed, resolved
+    status = Column(String(50), default="requested", nullable=False)  # requested, in_progress, submitted, approved
+    response_notes = Column(Text, nullable=True)  # Creator note upon acknowledging / addressing revision
     created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
 
     workspace = relationship("Workspace", back_populates="revisions")
     milestone = relationship("WorkspaceMilestone", back_populates="revisions")
     requester = relationship("User")
+
+
+class DeliveryCheckResult(Base):
+    """Persisted Buzz Check result for a specific uploaded deliverable version."""
+
+    __tablename__ = "delivery_check_results"
+
+    id = Column(Integer, primary_key=True, index=True)
+    file_id = Column(
+        Integer,
+        ForeignKey("shared_files.id", ondelete="CASCADE"),
+        nullable=False,
+        unique=True,  # one result per file (latest wins on re-check)
+    )
+    workspace_id = Column(Integer, nullable=False)
+    version = Column(Integer, nullable=False)
+    overall_status = Column(String(50), nullable=False)  # ready, needs_attention, blocked
+    readiness_score = Column(Integer, nullable=False)
+    check_details = Column(JSON, nullable=False, default=list)  # list of check dicts
+    warnings = Column(JSON, nullable=False, default=list)
+    suggested_fixes = Column(JSON, nullable=False, default=list)
+    generated_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+
+    file = relationship("SharedFile", back_populates="buzz_check_results")
+
+
+class ProjectRescueLog(Base):
+    """Immutable audit log of Project Rescue actions (plan adjustment, replacement initiation)."""
+
+    __tablename__ = "project_rescue_logs"
+
+    id = Column(Integer, primary_key=True, index=True)
+    workspace_id = Column(Integer, ForeignKey("workspaces.id", ondelete="CASCADE"), nullable=False)
+    action_type = Column(String(50), nullable=False)  # adjust_plan, continue_with_creator, initiate_replacement
+    triggered_by_user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
+    health_score_at_trigger = Column(Integer, nullable=False)
+    health_status_at_trigger = Column(String(50), nullable=False)
+    notes = Column(Text, nullable=True)
+    replacement_creator_user_id = Column(Integer, ForeignKey("users.id", ondelete="SET NULL"), nullable=True)
+    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+
+    workspace = relationship("Workspace", back_populates="rescue_logs")
+    triggered_by = relationship("User", foreign_keys=[triggered_by_user_id])
+    replacement_creator = relationship("User", foreign_keys=[replacement_creator_user_id])

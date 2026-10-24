@@ -136,6 +136,26 @@ export interface WorkspaceMessage {
   }>;
 }
 
+export interface BuzzCheckItem {
+  name: string;
+  label: string;
+  status: 'passed' | 'failed' | 'not_verified';
+  detail: string;
+}
+
+export interface BuzzCheckResult {
+  id?: number;
+  file_id: number;
+  workspace_id: number;
+  version: number;
+  overall_status: 'ready' | 'needs_attention' | 'blocked';
+  readiness_score: number;
+  check_details: BuzzCheckItem[];
+  warnings: string[];
+  suggested_fixes: string[];
+  generated_at: string;
+}
+
 export interface WorkspaceDeliverable {
   id: string;
   milestone_id?: number | null;
@@ -147,9 +167,17 @@ export interface WorkspaceDeliverable {
   version?: number;
   url: string;
   status: string;
+  description?: string;
+  client_feedback?: string;
+  width?: number | null;
+  height?: number | null;
+  duration_seconds?: number | null;
+  deliverable_type?: string | null;
+  is_current?: boolean;
   created_at?: string;
   uploader_id?: number;
   uploader_name?: string;
+  buzz_check?: BuzzCheckResult | null;
 }
 
 export interface WorkspaceReview {
@@ -170,8 +198,40 @@ export interface Revision {
   requester_id: number;
   description: string;
   status: string;
+  response_notes?: string;
   created_at: string;
   requester?: { id: number; full_name?: string; email?: string };
+}
+
+export interface AgreedLicensing {
+  commercial_use: boolean;
+  usage_types: string[];
+  territory: string;
+  duration_months: number;
+  duration_label: string;
+  platforms: string[];
+  notes?: string;
+}
+
+export interface ProductionTimelineItem {
+  id: string;
+  item_type: 'version_upload' | 'revision_request' | 'buzz_check';
+  version?: number | null;
+  file_id?: number | null;
+  filename?: string | null;
+  download_url?: string | null;
+  milestone_id?: number | null;
+  milestone_title?: string | null;
+  actor_name?: string | null;
+  actor_role?: string | null;
+  creator_note?: string | null;
+  client_feedback?: string | null;
+  revision_description?: string | null;
+  revision_response?: string | null;
+  status: string;
+  buzz_overall_status?: string | null;
+  buzz_readiness_score?: number | null;
+  created_at: string;
 }
 
 export interface Workspace {
@@ -190,6 +250,10 @@ export interface Workspace {
   messages: WorkspaceMessage[];
   revisions?: Revision[];
   review?: WorkspaceReview | null;
+  agreed_licensing?: AgreedLicensing;
+  timeline?: ProductionTimelineItem[];
+  brief?: any;
+  health?: ProjectHealth | null;
   unread_count: number;
   stage_tag: string;
   category_tag: string;
@@ -362,4 +426,186 @@ export interface XeroChatResponse {
   ai_provider_used: string;
   scope_warning?: string | null;
 }
+
+// ==========================================
+// Phase 3: Comparison, Trust & Blind Arena
+// ==========================================
+
+export interface TrustBadgeItem {
+  id: string;
+  label: string;
+  verified: boolean;
+  evidence: string;
+  icon?: string;
+}
+
+export interface ReliabilityFlagsItem {
+  completed_projects: number;
+  late_deliveries: number;
+  abandoned_projects: number;
+  unresolved_disputes: number;
+  on_time_percentage: number;
+  status: 'Reliable' | 'Minor Concern' | 'Reliability Concern';
+  notes: string[];
+}
+
+export interface CreatorTrustData {
+  creator_id: number;
+  user_id: number;
+  display_name: string;
+  is_verified: boolean;
+  is_rising_creator: boolean;
+  rising_creator_reason?: string | null;
+  badges: TrustBadgeItem[];
+  reliability: ReliabilityFlagsItem;
+}
+
+export interface RecruiterTrustData {
+  recruiter_user_id: number;
+  company_name?: string | null;
+  is_verified_business: boolean;
+  projects_commissioned: number;
+  projects_completed: number;
+  completion_rate_pct: number;
+  abandoned_engagements: number;
+  dispute_count: number;
+  response_behavior: string;
+  trust_status: string;
+}
+
+export interface CreatorCompareCardData {
+  creator_id: number;
+  user_id: number;
+  display_name: string;
+  avatar_url?: string | null;
+  specialization: string;
+  core_category?: string | null;
+  starting_rate: number;
+  delivery_days: number;
+  rating: number;
+  sla_score: number;
+  match_score: number;
+  ai_tools: string[];
+  portfolio_count: number;
+  portfolio_samples: Array<{
+    id?: number;
+    title: string;
+    category: string;
+    image_url: string;
+    tools_used?: string[];
+  }>;
+  licensing_status: string;
+  licensing_summary: string;
+  licensing_territory: string;
+  licensing_duration: string;
+  is_rising_creator: boolean;
+  reliability: ReliabilityFlagsItem;
+  badges: TrustBadgeItem[];
+  strengths: string[];
+  things_to_consider: string[];
+}
+
+export interface DifferenceExplanationItem {
+  creator_id: number;
+  creator_name: string;
+  unique_advantages: string[];
+  tradeoffs_vs_others: string[];
+}
+
+export interface CreatorComparisonResult {
+  candidates: CreatorCompareCardData[];
+  difference_explanations: DifferenceExplanationItem[];
+  summary_verdict: string;
+}
+
+export interface BlindPortfolioSampleItem {
+  title: string;
+  category: string;
+  image_url: string;
+  tools_used: string[];
+}
+
+export interface BlindCreatorCardItem {
+  anonymous_id: string;
+  blind_token: string;
+  specialization: string;
+  core_category?: string | null;
+  match_score: number;
+  starting_rate: number;
+  delivery_days: number;
+  ai_tools: string[];
+  portfolio_samples: BlindPortfolioSampleItem[];
+  licensing_status: string;
+  licensing_summary: string;
+  is_rising_creator: boolean;
+  strengths: string[];
+  things_to_consider: string[];
+}
+
+export interface BlindArenaData {
+  blind_arena_id: string;
+  tagline: string;
+  candidates: BlindCreatorCardItem[];
+}
+
+export interface BlindRevealData {
+  revealed_creator: CreatorCompareCardData;
+  why_this_creator_won: string;
+  what_others_did_better: Array<{
+    anonymous_id: string;
+    strengths: string[];
+  }>;
+}
+
+export interface ProtectedBudget {
+  total_budget: number;
+  approved_amount: number;
+  remaining_protected_balance: number;
+  disclaimer: string;
+}
+
+export interface ProjectHealth {
+  health_score: number;
+  health_status: 'ON TRACK' | 'AT RISK' | 'RESCUE RECOMMENDED';
+  reasons: string[];
+  adjust_plan_suggestions: string[];
+  protected_budget: ProtectedBudget;
+}
+
+export interface ProjectHandoffPack {
+  workspace_id: number;
+  project_title: string;
+  brief_overview: Record<string, any>;
+  agreed_licensing: Record<string, any>;
+  completed_milestones: Array<Record<string, any>>;
+  remaining_milestones: Array<Record<string, any>>;
+  deliverable_history: Array<Record<string, any>>;
+  recruiter_feedback_summary: string[];
+  unresolved_revisions: Array<Record<string, any>>;
+  remaining_deadline: string;
+  remaining_scope: string;
+}
+
+export interface ReplacementCandidate {
+  creator_id: number;
+  user_id: number;
+  name: string;
+  avatar?: string | null;
+  match_score: number;
+  specialization: string;
+  starting_rate: number;
+  delivery_days: number;
+  ai_tools: string[];
+  rating: number;
+  match_reasons: string[];
+  tradeoffs?: string[];
+}
+
+export interface RescueReplacementDetails {
+  workspace_id: number;
+  health: ProjectHealth;
+  handoff_pack: ProjectHandoffPack;
+  replacement_candidates: ReplacementCandidate[];
+}
+
 

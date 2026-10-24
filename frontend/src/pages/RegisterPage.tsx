@@ -39,13 +39,13 @@ export const RegisterPage: React.FC = () => {
       <div className="max-w-lg w-full bg-surface-container-low rounded-2xl p-space-lg md:p-space-xl border border-outline-variant/40 shadow-sm space-y-space-md">
         <div className="text-center space-y-space-xs">
           <div className="flex justify-center">
-            <BrandMark size="lg" />
+            <BrandMark size="lg" showTagline />
           </div>
           <h1 className="font-headline-md text-headline-md text-on-surface">
             Create Your Account
           </h1>
           <p className="font-body-sm text-body-sm text-on-surface-variant">
-            Join the marketplace to hire AI content creators or showcase your work.
+            Join KreatorBuzz to hire elite AI creators or create your own buzz.
           </p>
         </div>
 

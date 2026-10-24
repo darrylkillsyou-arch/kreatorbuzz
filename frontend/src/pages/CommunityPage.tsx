@@ -760,7 +760,7 @@ export const CommunityPage: React.FC = () => {
               <span className="font-label-sm text-label-sm text-secondary uppercase tracking-widest font-semibold block">Community Highlight</span>
               <h4 className="font-headline-sm text-headline-sm text-on-surface">Build in Public. Get Hired Faster.</h4>
               <p className="font-body-sm text-body-sm text-on-surface-variant leading-relaxed">
-                Recruiters on CODE XERO actively browse community posts. Showing your workflow, tools, and results gets you hired directly — without a cold DM.
+                Recruiters on KreatorBuzz actively browse community posts. Showing your workflow, tools, and results gets you hired directly — without a cold DM.
               </p>
             </div>
           </aside>

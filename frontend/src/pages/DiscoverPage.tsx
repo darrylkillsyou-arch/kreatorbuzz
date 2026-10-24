@@ -167,18 +167,18 @@ export const DiscoverPage: React.FC = () => {
       {/* Hero Section */}
       <section className="w-full max-w-7xl mx-auto px-gutter pt-space-xl pb-space-lg">
         <div className="max-w-3xl space-y-space-md">
-          <div className="inline-flex items-center gap-space-xs px-space-sm py-1 rounded-full bg-surface-container-high text-secondary">
-            <span className="w-1.5 h-1.5 rounded-full bg-secondary"></span>
-            <span className="font-label-sm text-label-sm tracking-wider uppercase">
-              Featured Creators • Fall 2025
+          <div className="inline-flex items-center gap-space-xs px-space-sm py-1 rounded-full bg-surface-container-high text-secondary border border-secondary/20">
+            <span className="w-1.5 h-1.5 rounded-full bg-secondary animate-pulse"></span>
+            <span className="font-label-sm text-label-sm tracking-wider uppercase font-semibold">
+              KreatorBuzz • Create Your Own Buzz
             </span>
           </div>
           <h1 className="font-display text-display text-on-surface tracking-tight leading-[1.08]">
             Discover the people shaping what’s next.
           </h1>
           <p className="font-body-lg text-body-lg text-on-surface-variant max-w-2xl">
-            Find AI content creators for images, videos, 3D, ads, fashion, and social media.
-            Hire verified talent for your next project.
+            Find elite AI content creators for generative video, hyperreal imagery, 3D CGI, and digital campaigns.
+            Hire verified talent and create your own buzz.
           </p>
         </div>
 
@@ -653,14 +653,14 @@ export const DiscoverPage: React.FC = () => {
         />
       )}
 
-      {/* Xero AI Assistant Floating Entry Point */}
+      {/* KreatorBuzz AI Copilot Floating Entry Point */}
       <div className="fixed bottom-6 right-6 z-40 max-w-sm">
         {isAiWidgetOpen ? (
           <div className="bg-surface-container-lowest text-on-surface rounded-2xl p-space-md border border-secondary/40 shadow-2xl space-y-space-sm animate-fade-in backdrop-blur-md">
             <div className="flex items-center justify-between pb-1 border-b border-surface-container">
               <div className="flex items-center gap-1.5">
                 <span className="material-symbols-outlined text-[18px] text-secondary">auto_awesome</span>
-                <span className="font-label-md font-bold text-on-surface">Xero AI</span>
+                <span className="font-label-md font-bold text-on-surface">Buzz Copilot</span>
               </div>
               <button
                 type="button"
@@ -676,10 +676,10 @@ export const DiscoverPage: React.FC = () => {
                 Need help finding the right creator?
               </h4>
               <p className="font-body-sm text-[13px] text-on-surface-variant leading-relaxed mt-1">
-                Tell Xero AI what you want to create and we’ll help build your project and recommend matching creators.
+                Tell Buzz Copilot what you want to create and we’ll structure your brief, milestones, and match top creators.
               </p>
               <span className="text-[11px] text-secondary font-medium block mt-1">
-                Describe your idea in simple words.
+                Create Your Own Buzz.
               </span>
             </div>
             <button
@@ -688,7 +688,7 @@ export const DiscoverPage: React.FC = () => {
               className="w-full py-2.5 bg-primary text-on-primary font-label-md rounded-full hover:bg-primary-container hover:text-on-surface transition-all flex items-center justify-center gap-1.5 shadow-sm cursor-pointer"
             >
               <span className="material-symbols-outlined text-[16px]">auto_awesome</span>
-              <span>Ask Xero AI</span>
+              <span>Ask Buzz Copilot</span>
             </button>
           </div>
         ) : (
@@ -700,7 +700,7 @@ export const DiscoverPage: React.FC = () => {
             <span className="material-symbols-outlined text-[20px] text-secondary group-hover:rotate-12 transition-transform">
               auto_awesome
             </span>
-            <span className="font-semibold">Ask Xero AI</span>
+            <span className="font-semibold">Ask Buzz Copilot</span>
           </button>
         )}
       </div>

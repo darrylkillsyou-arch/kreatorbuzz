@@ -3,39 +3,51 @@ import React from 'react';
 interface BrandMarkProps {
   size?: 'sm' | 'md' | 'lg';
   showWordmark?: boolean;
+  showTagline?: boolean;
   className?: string;
   markClassName?: string;
 }
 
 /**
- * CODE XERO CX monogram used in the navbar, auth screens, and footer.
+ * KreatorBuzz brand mark and monogram.
+ * Brand: KreatorBuzz
+ * Tagline: Create Your Own Buzz
  */
 export const BrandMark: React.FC<BrandMarkProps> = ({
   size = 'md',
   showWordmark = true,
+  showTagline = false,
   className = '',
   markClassName = '',
 }) => {
   const box =
-    size === 'lg' ? 'w-9 h-9' : size === 'sm' ? 'w-7 h-7' : 'w-8 h-8';
+    size === 'lg' ? 'w-10 h-10' : size === 'sm' ? 'w-7 h-7' : 'w-8 h-8';
   const letters =
-    size === 'lg' ? 'text-[11px]' : size === 'sm' ? 'text-[9px]' : 'text-[10px]';
+    size === 'lg' ? 'text-[13px]' : size === 'sm' ? 'text-[9px]' : 'text-[11px]';
 
   return (
-    <span className={`inline-flex items-center gap-space-xs ${className}`}>
+    <div className={`inline-flex items-center gap-space-xs ${className}`}>
       <span
-        className={`${box} rounded-lg bg-primary flex items-center justify-center text-secondary border border-secondary/30 shadow-sm ${markClassName}`}
+        className={`${box} rounded-xl bg-gradient-to-br from-amber-400 via-amber-500 to-amber-600 flex items-center justify-center text-black border border-amber-300/40 shadow-sm shrink-0 transition-transform hover:scale-105 ${markClassName}`}
         aria-hidden="true"
       >
-        <span className={`font-display font-bold ${letters} text-secondary leading-none tracking-tight`}>
-          CX
+        <span className={`font-display font-extrabold ${letters} text-black leading-none tracking-tighter drop-shadow-xs`}>
+          KB
         </span>
       </span>
       {showWordmark && (
-        <span className="font-headline-sm text-headline-sm tracking-tight text-on-surface ml-1">
-          CODE XERO
-        </span>
+        <div className="flex flex-col ml-1 leading-none">
+          <span className="font-headline-sm text-headline-sm tracking-tight text-on-surface font-bold flex items-center">
+            <span>Kreator</span>
+            <span className="text-secondary font-black tracking-normal ml-0.5">Buzz</span>
+          </span>
+          {showTagline && (
+            <span className="font-label-xs text-[10px] text-on-surface-variant font-medium tracking-wider uppercase mt-0.5">
+              Create Your Own Buzz
+            </span>
+          )}
+        </div>
       )}
-    </span>
+    </div>
   );
 };

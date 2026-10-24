@@ -7,9 +7,11 @@ from app.config import settings
 
 raw_db_url = settings.DATABASE_URL or "sqlite:///./maccall.db"
 
-# Supabase and Heroku often provide urls starting with postgres://, which SQLAlchemy 1.4+ deprecated
+# Format PostgreSQL url for SQLAlchemy with psycopg2 driver compatibility
 if raw_db_url.startswith("postgres://"):
-    db_url = raw_db_url.replace("postgres://", "postgresql://", 1)
+    db_url = raw_db_url.replace("postgres://", "postgresql+psycopg2://", 1)
+elif raw_db_url.startswith("postgresql://") and not raw_db_url.startswith("postgresql+"):
+    db_url = raw_db_url.replace("postgresql://", "postgresql+psycopg2://", 1)
 else:
     db_url = raw_db_url
 

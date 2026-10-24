@@ -65,11 +65,12 @@ async def lifespan(app: FastAPI):
     from app.models.users import User
     _init_db = SessionLocal()
     try:
-        if _init_db.query(User).count() == 0:
+        user_count = _init_db.query(User).count()
+        if user_count == 0:
             logger.info("Empty database detected. Populating baseline marketplace data...")
             try:
                 from app.seed import seed_database
-                seed_database()
+                seed_database(db=_init_db)
                 logger.info("Baseline data populated successfully.")
             except Exception as _seed_err:
                 logger.warning("Baseline auto-seed failed: %s", _seed_err)

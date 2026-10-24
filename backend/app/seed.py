@@ -24,13 +24,13 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("seed")
 
 
-def seed_database():
+def seed_database(db=None):
     """Seeds the database with full demo dataset."""
-    logger.info("Dropping and recreating database tables for fresh seed...")
-    Base.metadata.drop_all(bind=engine)
-    Base.metadata.create_all(bind=engine)
-
-    db = SessionLocal()
+    logger.info("Seeding database baseline records...")
+    should_close = False
+    if db is None:
+        db = SessionLocal()
+        should_close = True
     try:
         # 1. Create Core Users
         demo_pw = get_password_hash("demo1234")
@@ -857,7 +857,8 @@ def seed_database():
 
         logger.info("Database successfully seeded with realistic demo data!")
     finally:
-        db.close()
+        if should_close:
+            db.close()
 
 
 if __name__ == "__main__":

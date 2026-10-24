@@ -73,7 +73,8 @@ async def lifespan(app: FastAPI):
                 seed_database(db=_init_db)
                 logger.info("Baseline data populated successfully.")
             except Exception as _seed_err:
-                logger.warning("Baseline auto-seed failed: %s", _seed_err)
+                _init_db.rollback()
+                logger.warning("Baseline auto-seed skipped or failed: %s", _seed_err)
 
         # Ensure known demo accounts exist with active credentials
         try:
@@ -86,53 +87,59 @@ async def lifespan(app: FastAPI):
                 ("cleancreator@codexero.com", "Clean Content Creator", "creator", "Demo@123", "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=300&q=80"),
             ]
             for d_email, d_name, d_role, d_pass, d_avatar in known_demo_accounts:
-                existing = _init_db.query(User).filter(User.email == d_email.lower()).first()
-                if not existing:
-                    u = User(
-                        email=d_email.lower(),
-                        password_hash=get_password_hash(d_pass),
-                        full_name=d_name,
-                        role=d_role,
-                        avatar_url=d_avatar,
-                        bio=f"{d_role.capitalize()} account on KreatorBuzz.",
-                        location="Mumbai / London",
-                        is_active=True,
-                    )
-                    _init_db.add(u)
-                    _init_db.commit()
-                    _init_db.refresh(u)
-                else:
-                    u = existing
-                    # Ensure active status and proper credentials
-                    u.is_active = True
-                    u.password_hash = get_password_hash(d_pass)
-                    _init_db.commit()
-                    _init_db.refresh(u)
-
-                if d_role == "creator":
-                    prof = _init_db.query(CreatorProfile).filter(CreatorProfile.user_id == u.id).first()
-                    if not prof:
-                        prof = CreatorProfile(
-                            user_id=u.id,
-                            display_name=u.full_name,
-                            tagline="AI Visual Artist & Cinema Director",
-                            specialization="Cinematic Video & Luxury",
-                            skills=["Prompt Engineering", "Visual Direction", "Post-Production"],
-                            ai_tools=["Midjourney v6", "Runway Gen-3", "ComfyUI"],
-                            starting_rate=50000.0,
-                            delivery_days=5,
-                            commercial_rights=True,
-                            availability_status="available",
-                            rating=5.0,
-                            sla_score=99.0,
-                            on_time_percentage=100.0,
-                            location=u.location,
+                try:
+                    existing = _init_db.query(User).filter(User.email == d_email.lower()).first()
+                    if not existing:
+                        u = User(
+                            email=d_email.lower(),
+                            password_hash=get_password_hash(d_pass),
+                            full_name=d_name,
+                            role=d_role,
+                            avatar_url=d_avatar,
+                            bio=f"{d_role.capitalize()} account on KreatorBuzz.",
+                            location="Mumbai / London",
+                            is_active=True,
                         )
-                        _init_db.add(prof)
+                        _init_db.add(u)
                         _init_db.commit()
+                        _init_db.refresh(u)
+                    else:
+                        u = existing
+                        # Ensure active status and proper credentials
+                        u.is_active = True
+                        u.password_hash = get_password_hash(d_pass)
+                        _init_db.commit()
+                        _init_db.refresh(u)
+
+                    if d_role == "creator":
+                        prof = _init_db.query(CreatorProfile).filter(CreatorProfile.user_id == u.id).first()
+                        if not prof:
+                            prof = CreatorProfile(
+                                user_id=u.id,
+                                display_name=u.full_name,
+                                tagline="AI Visual Artist & Cinema Director",
+                                specialization="Cinematic Video & Luxury",
+                                skills=["Prompt Engineering", "Visual Direction", "Post-Production"],
+                                ai_tools=["Midjourney v6", "Runway Gen-3", "ComfyUI"],
+                                starting_rate=50000.0,
+                                delivery_days=5,
+                                commercial_rights=True,
+                                availability_status="available",
+                                rating=5.0,
+                                sla_score=99.0,
+                                on_time_percentage=100.0,
+                                location=u.location,
+                            )
+                            _init_db.add(prof)
+                            _init_db.commit()
+                except Exception as _acc_err:
+                    _init_db.rollback()
+                    logger.warning("Account init notice for %s: %s", d_email, _acc_err)
         except Exception as _demo_err:
+            _init_db.rollback()
             logger.warning("Error ensuring known demo accounts: %s", _demo_err)
     except Exception as _check_err:
+        _init_db.rollback()
         logger.warning("Database user count check error: %s", _check_err)
     finally:
         _init_db.close()

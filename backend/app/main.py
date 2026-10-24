@@ -100,27 +100,35 @@ async def lifespan(app: FastAPI):
                     _init_db.add(u)
                     _init_db.commit()
                     _init_db.refresh(u)
-                    if d_role == "creator":
-                        prof = _init_db.query(CreatorProfile).filter(CreatorProfile.user_id == u.id).first()
-                        if not prof:
-                            prof = CreatorProfile(
-                                user_id=u.id,
-                                display_name=u.full_name,
-                                tagline="AI Visual Artist & Cinema Director",
-                                specialization="Cinematic Video & Luxury",
-                                skills=["Prompt Engineering", "Visual Direction", "Post-Production"],
-                                ai_tools=["Midjourney v6", "Runway Gen-3", "ComfyUI"],
-                                starting_rate=50000.0,
-                                delivery_days=5,
-                                commercial_rights=True,
-                                availability_status="available",
-                                rating=5.0,
-                                sla_score=99.0,
-                                on_time_percentage=100.0,
-                                location=u.location,
-                            )
-                            _init_db.add(prof)
-                            _init_db.commit()
+                else:
+                    u = existing
+                    # Ensure active status and proper credentials
+                    u.is_active = True
+                    u.password_hash = get_password_hash(d_pass)
+                    _init_db.commit()
+                    _init_db.refresh(u)
+
+                if d_role == "creator":
+                    prof = _init_db.query(CreatorProfile).filter(CreatorProfile.user_id == u.id).first()
+                    if not prof:
+                        prof = CreatorProfile(
+                            user_id=u.id,
+                            display_name=u.full_name,
+                            tagline="AI Visual Artist & Cinema Director",
+                            specialization="Cinematic Video & Luxury",
+                            skills=["Prompt Engineering", "Visual Direction", "Post-Production"],
+                            ai_tools=["Midjourney v6", "Runway Gen-3", "ComfyUI"],
+                            starting_rate=50000.0,
+                            delivery_days=5,
+                            commercial_rights=True,
+                            availability_status="available",
+                            rating=5.0,
+                            sla_score=99.0,
+                            on_time_percentage=100.0,
+                            location=u.location,
+                        )
+                        _init_db.add(prof)
+                        _init_db.commit()
         except Exception as _demo_err:
             logger.warning("Error ensuring known demo accounts: %s", _demo_err)
     except Exception as _check_err:

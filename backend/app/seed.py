@@ -1,4 +1,4 @@
-﻿"""Seed database with realistic demo accounts, creators, portfolio, briefs, community feed, and workspaces."""
+"""Seed database with realistic demo accounts, creators, portfolio, briefs, community feed, and workspaces."""
 
 import logging
 from datetime import datetime, timedelta
@@ -79,12 +79,63 @@ def seed_database():
             is_active=True,
         )
 
-        db.add_all([brand_user, creator_user, admin_user, alexandra_user])
+        recruiter_user = User(
+            email="recruiter@codexero.com",
+            password_hash=demo_pw,
+            full_name="Demo Recruiter",
+            role="brand",
+            avatar_url="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=300&q=80",
+            bio="Head of Creative Production at Monolith Creative. Commissioning next-generation AI cinema.",
+            location="Mumbai / London",
+            is_active=True,
+        )
+
+        creator_user_codexero = User(
+            email="creator@codexero.com",
+            password_hash=demo_pw,
+            full_name="Demo Content Creator",
+            role="creator",
+            avatar_url="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=300&q=80",
+            bio="Award-winning AI Cinema Director. Specializing in kinetic runway films, photoreal hypercars, and luxury synthetic aesthetics.",
+            location="Paris / Milan",
+            is_active=True,
+        )
+
+        clean_recruiter = User(
+            email="cleanrecruiter@codexero.com",
+            password_hash=demo_pw,
+            full_name="Clean Recruiter",
+            role="brand",
+            avatar_url="https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=300&q=80",
+            bio="Clean brand account for testing fresh onboarding.",
+            location="Bangalore",
+            is_active=True,
+        )
+
+        clean_creator = User(
+            email="cleancreator@codexero.com",
+            password_hash=demo_pw,
+            full_name="Clean Content Creator",
+            role="creator",
+            avatar_url="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=300&q=80",
+            bio="Clean creator account for testing fresh workspace collaborations.",
+            location="Delhi",
+            is_active=True,
+        )
+
+        db.add_all([
+            brand_user, creator_user, admin_user, alexandra_user,
+            recruiter_user, creator_user_codexero, clean_recruiter, clean_creator
+        ])
         db.commit()
         db.refresh(brand_user)
         db.refresh(creator_user)
         db.refresh(admin_user)
         db.refresh(alexandra_user)
+        db.refresh(recruiter_user)
+        db.refresh(creator_user_codexero)
+        db.refresh(clean_recruiter)
+        db.refresh(clean_creator)
 
         # 2. Additional Creator Users â€” 87 creators covering all 9 categories with INR pricing
         # Tuple: (name, email, specialization, avatar_url, location, ai_tools, skills, starting_rate_inr, delivery_days, rating, briefs_count, sla_score)
@@ -349,13 +400,12 @@ def seed_database():
                 is_active=True,
             )
             db.add(u)
-            db.commit()
-            db.refresh(u)
+            db.flush()
 
             prof = CreatorProfile(
                 user_id=u.id,
                 display_name=name,
-                tagline=f"Master AI Director â€” {spec}",
+                tagline=f"Master AI Director — {spec}",
                 specialization=spec,
                 skills=skills,
                 ai_tools=tools,
@@ -374,8 +424,6 @@ def seed_database():
             creator_entities.append(prof)
 
         db.commit()
-        for c in creator_entities:
-            db.refresh(c)
 
         # 3. Creator Verifications and Achievements
         verif_types = ["identity", "tools", "portfolio", "workflow", "past_work", "commercial_rights"]
@@ -622,8 +670,7 @@ def seed_database():
                 status=status,
             )
             db.add(ws)
-            db.commit()
-            db.refresh(ws)
+            db.flush()
 
             # Workspace Members
             db.add(WorkspaceMember(workspace_id=ws.id, user_id=brand_user.id, role="brand"))
@@ -653,10 +700,7 @@ def seed_database():
                 status="released" if status == "delivered" else "pending",
             )
             db.add_all([m1, m2, m3])
-            db.commit()
-            db.refresh(m1)
-            db.refresh(m2)
-            db.refresh(m3)
+            db.flush()
 
             # Messages (Encrypted at rest!)
             msg1 = WorkspaceMessage(

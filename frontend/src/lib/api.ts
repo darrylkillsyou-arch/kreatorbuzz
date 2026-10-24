@@ -3,7 +3,8 @@ import type { Creator, Brief, CommunityPost, PostCommentItem, Workspace, User, P
 import { INITIAL_CREATORS, INITIAL_WORKSPACES } from './mockData';
 import { getCreatorAvatar, getCreatorHeroImage } from './creatorImages';
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '/api';
+const rawBase = import.meta.env.VITE_API_BASE_URL || import.meta.env.VITE_API_URL || '/api';
+const API_BASE_URL = rawBase.endsWith('/api') ? rawBase : `${rawBase.replace(/\/+$/, '')}/api`;
 
 function getAuthHeader(): Record<string, string> {
   const token = localStorage.getItem('codexero_token') || localStorage.getItem('maccall_token');

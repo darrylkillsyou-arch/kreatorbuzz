@@ -9,6 +9,9 @@ from app.models.workspaces import (
     WorkspaceMilestone,
     SharedFile,
     RevisionRequest,
+    Review,
+    DeliveryCheckResult,
+    ProjectRescueLog,
 )
 from app.models.shortlist import Shortlist
 from app.models.leaderboard import LeaderboardEntry
@@ -34,6 +37,9 @@ __all__ = [
     "WorkspaceMilestone",
     "SharedFile",
     "RevisionRequest",
+    "Review",
+    "DeliveryCheckResult",
+    "ProjectRescueLog",
     "Shortlist",
     "LeaderboardEntry",
     "Proposal",

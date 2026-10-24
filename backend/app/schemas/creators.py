@@ -50,8 +50,8 @@ class CreatorProfileBase(BaseModel):
     display_name: str
     tagline: Optional[str] = None
     specialization: str
-    skills: List[str] = []
-    ai_tools: List[str] = []
+    skills: Optional[List[str]] = []
+    ai_tools: Optional[List[str]] = []
     starting_rate: float = 500.0
     delivery_days: int = 7
     commercial_rights: bool = True
@@ -63,8 +63,8 @@ class CreatorProfileBase(BaseModel):
     is_verified: bool = False
     location: Optional[str] = None
     core_category: Optional[str] = None
-    sub_specializations: List[str] = []
-    style_tags: List[str] = []
+    sub_specializations: Optional[List[str]] = []
+    style_tags: Optional[List[str]] = []
 
 
 class CreatorProfileCreate(CreatorProfileBase):

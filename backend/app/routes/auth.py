@@ -57,6 +57,9 @@ def register_user(user_in: UserCreate, db: Session = Depends(get_db)):
             sla_score=99.0,
             on_time_percentage=100.0,
             location=user.location,
+            core_category="AI Video",
+            sub_specializations=["Cinematic Video", "Luxury & Editorial"],
+            style_tags=["Cinematic", "Luxury"],
         )
         db.add(creator_profile)
         db.commit()

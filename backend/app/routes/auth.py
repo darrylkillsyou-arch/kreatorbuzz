@@ -22,11 +22,15 @@ def register_user(user_in: UserCreate, db: Session = Depends(get_db)):
         )
 
     hashed_pw = get_password_hash(user_in.password)
+    clean_role = (user_in.role or "brand").strip().lower()
+    if clean_role not in ("brand", "creator", "admin"):
+        clean_role = "brand"
+
     user = User(
-        email=user_in.email.lower(),
+        email=user_in.email.strip().lower(),
         password_hash=hashed_pw,
-        full_name=user_in.full_name,
-        role=user_in.role,
+        full_name=user_in.full_name.strip() if user_in.full_name else "User",
+        role=clean_role,
         avatar_url=user_in.avatar_url or "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=300&q=80",
         bio=user_in.bio,
         location=user_in.location or "Global",
@@ -64,7 +68,8 @@ def register_user(user_in: UserCreate, db: Session = Depends(get_db)):
 @router.post("/login", response_model=Token)
 def login_user(login_data: UserLogin, db: Session = Depends(get_db)):
     """Authenticates user with email and password."""
-    user = db.query(User).filter(User.email == login_data.email.lower()).first()
+    clean_email = str(login_data.email).strip().lower()
+    user = db.query(User).filter(User.email == clean_email).first()
     if not user or not verify_password(login_data.password, user.password_hash):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,

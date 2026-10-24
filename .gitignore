@@ -77,3 +77,6 @@ coverage.xml
 
 .vercel
 .env*
+
+.agents/
+skills-lock.json
